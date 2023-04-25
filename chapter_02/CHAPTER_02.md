@@ -1,12 +1,7 @@
 # Chapter 02
 
-The file `foods_no_heading.csv` contains this data
-```
-apple,red,100,true
-banana,yellow,100,true
-cookie,brown,200,false
-chocolate,brown,150,false
-```
+# Load data into DuckDB 
+
 
 ```sql
 drop table if exists foods;
@@ -23,171 +18,99 @@ select *
 from foods;
 ```
 
-Shows we have loaded four rows of data into the table `foods`
-```
-┌───────────┬─────────┬──────────┬────────────┐
-│ food_name │  color  │ calories │ is_healthy │
-│  varchar  │ varchar │  int32   │  boolean   │
-├───────────┼─────────┼──────────┼────────────┤
-│ apple     │ red     │      100 │ true       │
-│ banana    │ yellow  │      100 │ true       │
-│ cookie    │ brown   │      200 │ false      │
-│ chocolate │ brown   │      150 │ false      │
-└───────────┴─────────┴──────────┴────────────┘
+## COPY file options during load
+
+```sql
+COPY foods (food_name, is_healthy, color, calories)  
+FROM 'foods_with_heading.txt' (DELIMITER '\t', HEADER);
 ```
 
-Now led us look at some data with an unexpected value. The file `foods_error.csv` contains text
 
-```
-orange,orange,eighty,true
-```
+## Error handling with the COPY Statement
 
 ```sql
 COPY foods FROM 'foods_error.csv';
-```
 
-```
-Error: Invalid Input Error: Could not convert string 'eighty' to INT32 at line 1 in column 2.
-```
-
-```sql
-SELECT * 
-FROM read_csv_auto('foods_no_heading.csv');
-```
-
-```
-┌───────────┬─────────┬──────────┬────────────┐
-│ food_name │  color  │ calories │ is_healthy │
-│  varchar  │ varchar │  int64   │  boolean   │
-├───────────┼─────────┼──────────┼────────────┤
-│ apple     │ red     │      100 │ true       │
-│ banana    │ yellow  │      100 │ true       │
-│ cookie    │ brown   │      200 │ false      │
-│ chocolate │ brown   │      150 │ false      │
-└───────────┴─────────┴──────────┴────────────┘
-```
-
-
-Now imagine we have some illegal or unexpected data. The following data file has a string (eighty) instead of a number
-
-```
-orange,orange,eighty,true
-pear,green,60,true
-```
-
-```sql
-COPY foods FROM 'foods_error.csv' ;
-```
-
-Gives this error
-
-```
-Error: Invalid Input Error: Could not convert string 'eighty' to INT32 at line 1 in column 2. Parser options:
-```
-
-We can use the `ignore_errors` option to skip over any parsing errors encountered. This alows us to instead ignore rows with errors.
-
-```sql
 COPY foods FROM 'foods_error.csv' (ignore_errors true);
 ```
 
 
+## File loading with read_csv
+
+```sql
+SELECT * 
+FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE);
+
+DESCRIBE SELECT * 
+FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE);
+```
+
+## Table creation with read_csv
+
+```sql
+CREATE TABLE low_cost_foods 
+as 
+SELECT * 
+FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE) 
+WHERE price < 4.00;
+
+SELECT * 
+FROM low_cost_foods;
+```
+
+## Date formats 
+
+```sql
+SELECT * 
+FROM read_csv('food_orders.csv', AUTO_DETECT=TRUE);
+
+SELECT * 
+FROM read_csv('food_orders.csv', AUTO_DETECT=TRUE, dateformat='%Y%m%d');
+
+SELECT * 
+FROM read_csv('food_orders.csv'
+, dateformat='%Y%m%d'
+, columns={
+   'food_name': 'VARCHAR', 
+   'order_date': 'DATE', 
+   'quantity': 'INTEGER'}
+, header=true);
+```
+
+## Loading multiple files
+
+```sql
+SELECT food_name, color, filename   
+FROM read_csv('food_collection/pizza*.csv', 
+AUTO_DETECT=TRUE, 
+FILENAME=TRUE);
+```
 
 ## Mixed schemas
 
-We sometime face the situation where the files we wish to load many files - but there is a difference in how they are formatted. Take for example the situation where we wish to load a collection of food files, but the 
-
-```
-food_name,color
-pizza,mixed
-fries,yellow
-```
-
-However our next file has a different ordering of columns
-
-```
-color,food_name,calories,is_healthy
-green,salad,50,TRUE
-white,yogurt,20,TRUE
-```
-
 ```sql
-SELECT * 
-FROM read_csv_auto('food_collection/*.csv');
+SELECT *  
+FROM read_csv('food_collection/*.csv', AUTO_DETECT=TRUE);
+
+SELECT *  
+FROM read_csv('food_collection/*.csv', 
+UNION_BY_NAME=TRUE, 
+AUTO_DETECT=TRUE);
 ```
 
 
-Gives this error
-
-```
-Error: Invalid Input Error: Could not convert string 'FALSE' to INT64 at line 2 in column 2. Parser options:
-```
-
-```sql
-SELECT * 
-FROM read_csv_auto('food_collection/*.csv', union_by_name=True);
-```
-
-```
-┌───────────┬─────────┬──────────┬────────────┐
-│ food_name │  color  │ calories │ is_healthy │
-│  varchar  │ varchar │  int64   │  boolean   │
-├───────────┼─────────┼──────────┼────────────┤
-│ sushi     │ mixed   │       60 │ true       │
-│ pho       │ yellow  │       70 │ true       │
-│ pizza     │ mixed   │      120 │ false      │
-│ fries     │ yellow  │      100 │ false      │
-│ salad     │ green   │       50 │ true       │
-│ yogurt    │ white   │       20 │ true       │
-└───────────┴─────────┴──────────┴────────────┘
-```
+# Parquet
 
 
-## Date formatting
-
-```sql
-describe SELECT * FROM read_csv_auto('food_orders.csv');
-```
-
-```
-┌─────────────┬─────────────┬─────────┬─────────┬─────────┬─────────┐
-│ column_name │ column_type │  null   │   key   │ default │  extra  │
-│   varchar   │   varchar   │ varchar │ varchar │ varchar │ varchar │
-├─────────────┼─────────────┼─────────┼─────────┼─────────┼─────────┤
-│ food_name   │ VARCHAR     │ YES     │         │         │         │
-│ order_date  │ VARCHAR     │ YES     │         │         │         │
-│ quantity    │ BIGINT      │ YES     │         │         │         │
-└─────────────┴─────────────┴─────────┴─────────┴─────────┴─────────┘
-```
-
-What we want to do is to ensure the `order_date` is actually a DATE and not a VARCHAR
-
-
-
-```sql
-SELECT * 
-from read_csv('food_orders.csv', 
-delim=',', 
-header=True, 
-dateformat='%Y-%b-%d',
-columns={
-  'food_name': 'VARCHAR',
-  'order_date ': 'DATE',
-  'quantity': 'INT'
- }
-) ;
-
-create table food_orders (food_name varchar not null, order_date date not null, quantity integer, PRIMARY KEY(food_name, order_date));
-```
-
-
-
-
-## Parquet
+## Loading Parquet Files
 
 ```sql
 describe select * from read_parquet('food_orders.parquet');
 ```
+
+
+# IGNORE BELOW
+
 
 ```
 ┌─────────────┬─────────────┬─────────┬─────────┬─────────┬─────────┐
