@@ -99,89 +99,54 @@ AUTO_DETECT=TRUE);
 ```
 
 
+# JSON Files
+
+```sql
+SELECT *  
+FROM read_json('pizza_orders_records.json',  
+AUTO_DETECT=true,
+JSON_FORMAT='records');
+
+SELECT *
+FROM read_json('pizza_orders_array_of_records.json',
+AUTO_DETECT=true,
+JSON_FORMAT='array_of_records');
+```
+
 # Parquet
 
 
 ## Loading Parquet Files
 
 ```sql
-describe select * from read_parquet('food_orders.parquet');
+SELECT * 
+FROM parquet_schema('food_orders.parquet');
+
+SELECT *
+FROM read_parquet('food_orders.parquet');
 ```
 
 
-# IGNORE BELOW
+# Exploring public data sets
 
+- Visit  [Melbourne Bike Share Station Readings](https://data.melbourne.vic.gov.au/explore/dataset/melbourne-bike-share-station-readings-2011-2017/information/)
+- Download the compressed CSV file locally to your local machine.
+- Unzip the downloaded file to extract the files from the compressed file and save them on your computer
+- You should have a file called `archive/74id-aqj9.csv` 
 
-```
-┌─────────────┬─────────────┬─────────┬─────────┬─────────┬─────────┐
-│ column_name │ column_type │  null   │   key   │ default │  extra  │
-│   varchar   │   varchar   │ varchar │ varchar │ varchar │ varchar │
-├─────────────┼─────────────┼─────────┼─────────┼─────────┼─────────┤
-│ food_name   │ VARCHAR     │ YES     │         │         │         │
-│ order_date  │ DATE        │ YES     │         │         │         │
-│ quantity    │ INTEGER     │ YES     │         │         │         │
-└─────────────┴─────────────┴─────────┴─────────┴─────────┴─────────┘
-```
-
-
-```sql
-drop table if exists food_orders;
-
-create table food_orders as select * from read_parquet('food_orders.parquet');
-```
-
-```sql
- describe food_orders;
- ```
-
- ```
-┌─────────────┬─────────────┬─────────┬─────────┬─────────┬───────┐
-│ column_name │ column_type │  null   │   key   │ default │ extra │
-│   varchar   │   varchar   │ varchar │ varchar │ varchar │ int32 │
-├─────────────┼─────────────┼─────────┼─────────┼─────────┼───────┤
-│ food_name   │ VARCHAR     │ YES     │         │         │       │
-│ order_date  │ DATE        │ YES     │         │         │       │
-│ quantity    │ INTEGER     │ YES     │         │         │       │
-└─────────────┴─────────────┴─────────┴─────────┴─────────┴───────┘
-```
-
-
-
-https://duckdb.org/docs/api/cli.html 
+## Loading the bike station readings
 
 ```sql
 .mode line
 
-select * 
+select *
 from read_csv(
-  'archive/74id-aqj9.csv', 
-  auto_detect=true, 
-  normalize_names=true, 
-  IGNORE_ERRORS=true
-) 
+'archive/74id-aqj9.csv',
+auto_detect=true)
 limit 1;
-```
 
-```
-                id = 2
-             _name = Harbour Town - Docklands
-      terminalname = 60000
-           nbbikes = 10
-      nbemptydocks = 11
-           rundate = 20170422134506
-         installed = true
-        _temporary = false
-           _locked = false
-lastcommwithserver = 1492832566010
-  latestupdatetime = 1492832565029
-       removaldate =
-       installdate = 1313724600000
-               lat = -37.814022
-              long = 144.939521
-         _location = (-37.814022, 144.939521)
-```
+.mode duckbox
 
-```sql
 CREATE TABLE bikes
 as
 SELECT * 
@@ -211,43 +176,11 @@ from read_csv(
 ) ;
 
 
- .mode duckbox
+select count(*)
+from bikes;
+
+summarize 
+select *  
+from bikes;
 ```
 
-
-# OLD BELOW
-
-```sql
-create table wines as select * from read_csv('archive/winemag-data_first150k.csv', auto_detect=true);
-D describe wines;
-┌─────────────┬─────────────┬─────────┬─────────┬─────────┬───────┐
-│ column_name │ column_type │  null   │   key   │ default │ extra │
-│   varchar   │   varchar   │ varchar │ varchar │ varchar │ int32 │
-├─────────────┼─────────────┼─────────┼─────────┼─────────┼───────┤
-│ column00    │ BIGINT      │ YES     │         │         │       │
-│ country     │ VARCHAR     │ YES     │         │         │       │
-│ description │ VARCHAR     │ YES     │         │         │       │
-│ designation │ VARCHAR     │ YES     │         │         │       │
-│ points      │ BIGINT      │ YES     │         │         │       │
-│ price       │ DOUBLE      │ YES     │         │         │       │
-│ province    │ VARCHAR     │ YES     │         │         │       │
-│ region_1    │ VARCHAR     │ YES     │         │         │       │
-│ region_2    │ VARCHAR     │ YES     │         │         │       │
-│ variety     │ VARCHAR     │ YES     │         │         │       │
-│ winery      │ VARCHAR     │ YES     │         │         │       │
-├─────────────┴─────────────┴─────────┴─────────┴─────────┴───────┤
-│ 11 rows                                               6 columns │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-```
-D select * from read_csv('archive/74id-aqj9.csv', auto_detect=true, normalize_names=true, IGNORE_ERRORS=true) limit 1;
-┌───────┬──────────────────────┬──────────────┬─────────┬───┬────────────┬────────────┬──────────────────────┐
-│  id   │        _name         │ terminalname │ nbbikes │ … │    lat     │    long    │      _location       │
-│ int64 │       varchar        │    int64     │  int64  │   │   double   │   double   │       varchar        │
-├───────┼──────────────────────┼──────────────┼─────────┼───┼────────────┼────────────┼──────────────────────┤
-│     2 │ Harbour Town - Doc…  │        60000 │      10 │ … │ -37.814022 │ 144.939521 │ (-37.814022, 144.9…  │
-├───────┴──────────────────────┴──────────────┴─────────┴───┴────────────┴────────────┴──────────────────────┤
-│ 1 rows                                                                                16 columns (7 shown) │
-└────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
