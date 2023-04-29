@@ -184,3 +184,27 @@ select *
 from bikes;
 ```
 
+# Exporting data
+
+```sql
+create table bike_rides_april 
+as 
+select * 
+from bikes 
+where rundate between '2017-04-01' and '2017-04-30';
+
+COPY bike_rides_april
+TO 'bike_rides_april.csv' (HEADER, DELIMITER ',');
+
+
+COPY (select _name, rundate from bike_rides_april)
+TO 'bike_rides_april.json' (FORMAT JSON, dateformat '%d %B %Y');
+
+
+COPY bike_rides_april 
+TO 'bike_rides' 
+(FORMAT PARQUET, PARTITION_BY (rundate));
+
+
+```
+
