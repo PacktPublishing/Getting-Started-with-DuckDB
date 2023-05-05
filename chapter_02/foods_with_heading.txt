@@ -1,5 +1,3 @@
 food_name	is_healthy	color	calories
-apple	TRUE	red	100
-banana	TRUE	yellow	100
-cookie	FALSE	brown	200
-chocolate	FALSE	brown	150
+plum	TRUE	green	100
+soup	TRUE	yellow	100
