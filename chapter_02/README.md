@@ -22,7 +22,7 @@ from foods;
 
 ```sql
 COPY foods (food_name, is_healthy, color, calories)  
-FROM 'foods_with_heading.txt' (DELIMITER '\t', HEADER);
+FROM 'foods_with_heading.tsv' (DELIMITER '\t', HEADER);
 ```
 
 
