@@ -4,13 +4,12 @@
 
 
 ```sql
-drop table if exists foods;
-
-create table foods (
-  food_name varchar primary key, 
-  color varchar,
-  calories int, 
-  is_healthy boolean);
+CREATE OR REPLACE TABLE foods (
+  food_name VARCHAR PRIMARY KEY, 
+  color VARCHAR,
+  calories INT, 
+  is_healthy BOOLEAN
+);
 
 COPY foods FROM 'foods_no_heading.csv';
 
@@ -48,7 +47,7 @@ FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE);
 ## Table creation with read_csv
 
 ```sql
-CREATE TABLE low_cost_foods 
+CREATE OR REPLACE TABLE low_cost_foods 
 as 
 SELECT * 
 FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE) 
@@ -147,12 +146,11 @@ limit 1;
 
 .mode duckbox
 
-CREATE TABLE bikes
+CREATE OR REPLACE TABLE bikes
 as
 SELECT * 
 from read_csv(
   'archive/74id-aqj9.csv', 
-  delim=',', 
   header=True, 
   dateformat='%Y%m%d%H%M%S',
   columns={
@@ -187,7 +185,7 @@ from bikes;
 # Exporting table data
 
 ```sql
-create table bike_rides_april 
+CREATE OR REPLACE TABLE bike_rides_april 
 as 
 select * 
 from bikes 
