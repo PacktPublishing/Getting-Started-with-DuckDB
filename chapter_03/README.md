@@ -12,6 +12,17 @@ FROM './access.log' (DELIMITER '\n');
 SELECT *
 FROM web_log_text;
 
+SELECT regexp_extract(raw_text, '^[0-9\.]*' ) as client_ip 
+FROM  web_log_text;
+
+SELECT regexp_extract(raw_text, '^[0-9\.]*' ) as client_ip, 
+regexp_extract(raw_text, '\[(.*)\]',1 ) as date_text,
+regexp_extract(raw_text, '"([A-Z]*) ',1 ) as http_method,
+regexp_extract(raw_text, '([a-zA-Z\-]*)"$', 1) as lang
+FROM  web_log_text
+LIMIT 5;
+
+
 CREATE OR REPLACE TABLE web_log_split
 AS
 SELECT regexp_extract(raw_text, '^[0-9\.]*' ) as client_ip, 
@@ -19,9 +30,15 @@ SELECT regexp_extract(raw_text, '^[0-9\.]*' ) as client_ip,
   regexp_extract(raw_text, '"([A-Z]*) ',1 ) as http_method,
   regexp_extract(raw_text, '([a-zA-Z\-]*)"$', 1) as http_lang
 FROM  web_log_text;
+```
 
+## Altering tables and views 
+
+```sql
 SELECT *
 FROM web_log_split;
+
+DESCRIBE web_log_split;
 
 SELECT client_ip,
 strptime(http_date_text, '%d/%b/%Y:%H:%M:%S %z') as http_date,
@@ -38,13 +55,9 @@ SET http_date = strptime(http_date_text, '%d/%b/%Y:%H:%M:%S %z');
 SELECT client_ip,
 http_date,
 http_method,
-http_lang,
+http_lang
 FROM web_log_split;
-```
 
-## Create, alter and drop tables and views 
-
-```sql
 CREATE OR REPLACE TABLE language_iso(
   lang_iso VARCHAR PRIMARY KEY, 
   language_name VARCHAR
@@ -54,17 +67,13 @@ INSERT INTO language_iso
 SELECT *
 FROM read_csv('./language_iso.csv', AUTO_DETECT=TRUE, header=True);
 
-SELECT wls.client_ip,
-wls.http_date,
-wls.http_method,
+SELECT wls.http_date,
 wls.http_lang,
 ln.language_name 
 FROM web_log_split wls
 JOIN language_iso ln on (wls.http_lang = ln.lang_iso);
 
-SELECT wls.client_ip,
-wls.http_date,
-wls.http_method,
+SELECT wls.http_date,
 wls.http_lang,
 ln.language_name 
 FROM web_log_split wls
@@ -100,33 +109,30 @@ FROM web_log_view;
 
 
 
-## Aggregate functions, window functions and common table expressions
+## Aggregate functions and common table expressions
 ```sql
 
 .read "web_log_script.sql"
+
+SELECT min(http_date) as date_earliest,
+max(http_date) as date_latest,
+count(*) as cnt
+FROM web_log_view;
+
 
 SELECT http_date,
 time_bucket(interval '1 day', http_date) as day
 FROM web_log_view;
 
-WITH cte as (
-  SELECT client_ip,
-  time_bucket(interval '1 day', http_date) as day,
-  language_name
-  FROM web_log_view
-)
-SELECT *
-from cte;
 
-
-WITH cte as (
+WITH web_cte as (
   SELECT client_ip,
   time_bucket(interval '1 day', http_date) as day,
   language_name
   FROM web_log_view
 )
 SELECT day, language_name, count(*) as count
-FROM cte
+FROM web_cte
 GROUP BY day, language_name
 ORDER BY day, count(*) DESC;
 ```
@@ -139,10 +145,14 @@ AS
 SELECT *
 FROM read_parquet('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet');
 
-SELECT * 
+SELECT tpep_pickup_datetime, 
+trip_distance, 
+fare_amount, 
+tip_amount,  
+PULocationID, 
+DOLocationID
 FROM trips 
 LIMIT 10;
-
 
 CREATE OR REPLACE TABLE locations (
   LocationID int  PRIMARY KEY,
@@ -153,11 +163,11 @@ CREATE OR REPLACE TABLE locations (
 
 INSERT INTO locations(LocationID, Borough, Zone, service_zone)
 SELECT LocationID, Borough, Zone, service_zone
-FROM read_csv('https://d37ci6vzurychx.cloudfront.net/misc/taxi+_zone_lookup.csv', AUTO_DETECT=TRUE);
+FROM read_csv('https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv', AUTO_DETECT=TRUE);
 
-SELECT * 
+SELECT LocationID, Borough, Zone
 FROM locations
-LIMIT 10;
+LIMIT 5;
 
 CREATE OR REPLACE TABLE trips_with_location
 AS
@@ -168,7 +178,12 @@ FROM trips t
 LEFT JOIN locations l_pu on l_pu.LocationID = t.PULocationID 
 LEFT JOIN locations l_do on l_do.LocationID = t.DOLocationID ;
 
-DESCRIBE trips_with_location;
+SELECT tpep_pickup_datetime, 
+pick_up_zone, 
+drop_off_zone, 
+trip_distance
+FROM trips_with_location
+LIMIT 5;
 
 
 SELECT time_bucket(interval '1 day', tpep_pickup_datetime) as day_of,
@@ -177,8 +192,9 @@ min(fare_amount) as fare_min,
 max(fare_amount) as fare_max,
 avg(fare_amount) as fare_avg,
 avg(tip_amount) as tip_avg,
-avg(tip_amount/fare_amount)*100 as tip_avg_pct
+avg(case when Payment_type =1 then tip_amount/fare_amount end)*100 as cc_tip_avg_pct
 FROM trips_with_location 
+where tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
 GROUP BY 1
 ORDER BY 1;
 
@@ -188,7 +204,7 @@ min(fare_amount) as fare_min,
 max(fare_amount) as fare_max,
 round(avg(fare_amount), 2) as fare_avg,
 round(avg(tip_amount), 2) as tip_avg,
-round(avg(tip_amount/fare_amount)*100, 0) as tip_avg_pct
+round(avg(case when Payment_type =1 then tip_amount/fare_amount end)*100, 0) as cc_tip_avg_pct
 FROM trips_with_location 
 where tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
 and fare_amount>0
@@ -207,6 +223,5 @@ WHERE fare_amount = max_day_fare_amount
 AND tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
 ORDER BY tpep_pickup_datetime
 ;
-
 ```
 
