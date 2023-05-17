@@ -211,7 +211,6 @@ and fare_amount>0
 GROUP BY 1
 ORDER BY 1;
 
--- lets pull out the details of the highest daily fares
 WITH cte AS (
   SELECT twl.*,
   max(fare_amount) over  (partition by time_bucket(interval '1 day', tpep_pickup_datetime)) as max_day_fare_amount
