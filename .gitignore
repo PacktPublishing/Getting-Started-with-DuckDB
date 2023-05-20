@@ -9,3 +9,6 @@ chapter_02/bike_rides_april.json
 chapter_02/export_directory/*
 chapter_03/web_usage.csv
 chapter_03/ADHOC_NOTES.md
+chapter_04/*.parquet
+chapter_04/book_reviews_hive/*
+chapter_04/profile*.log
