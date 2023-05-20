@@ -135,9 +135,16 @@ SELECT day, language_name, count(*) as count
 FROM web_cte
 GROUP BY day, language_name
 ORDER BY day, count(*) DESC;
+
+WITH web_cte as (
+  SELECT time_bucket(interval '1 day', http_date) as day,
+  language_name
+  FROM web_log_view
+)
+PIVOT web_cte ON language_name USING count(*);
 ```
 
-## Join, union and intersect data from multiple tables
+## Join data from multiple tables
 ```sql
 
 CREATE OR REPLACE TABLE trips
@@ -173,7 +180,9 @@ CREATE OR REPLACE TABLE trips_with_location
 AS
 SELECT t.*,
 l_pu.zone as pick_up_zone,
-l_do.zone as drop_off_zone
+l_pu.borough as pick_up_borough,
+l_do.zone as drop_off_zone,
+l_do.borough as drop_off_borough
 FROM trips t
 LEFT JOIN locations l_pu on l_pu.LocationID = t.PULocationID 
 LEFT JOIN locations l_do on l_do.LocationID = t.DOLocationID ;
@@ -194,7 +203,7 @@ avg(fare_amount) as fare_avg,
 avg(tip_amount) as tip_avg,
 avg(case when Payment_type =1 then tip_amount/fare_amount end)*100 as cc_tip_avg_pct
 FROM trips_with_location 
-where tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
+WHERE tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
 GROUP BY 1
 ORDER BY 1;
 
@@ -206,7 +215,7 @@ round(avg(fare_amount), 2) as fare_avg,
 round(avg(tip_amount), 2) as tip_avg,
 round(avg(case when Payment_type =1 then tip_amount/fare_amount end)*100, 0) as cc_tip_avg_pct
 FROM trips_with_location 
-where tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
+WHERE tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
 and fare_amount>0
 GROUP BY 1
 ORDER BY 1;
