@@ -104,12 +104,12 @@ AUTO_DETECT=TRUE);
 SELECT *  
 FROM read_json('pizza_orders_records.json',  
 AUTO_DETECT=true,
-JSON_FORMAT='records');
+FORMAT='newline_delimited');
 
 SELECT *
 FROM read_json('pizza_orders_array_of_records.json',
 AUTO_DETECT=true,
-JSON_FORMAT='array_of_records');
+FORMAT='array');
 ```
 
 # Parquet
@@ -174,12 +174,12 @@ from read_csv(
 ) ;
 
 
-select count(*)
-from bikes;
+SELECT count(*)
+FROM bikes;
 
-summarize 
-select *  
-from bikes;
+SUMMARIZE 
+SELECT *  
+FROM bikes;
 ```
 
 # Exporting table data
@@ -187,9 +187,9 @@ from bikes;
 ```sql
 CREATE OR REPLACE TABLE bike_rides_april 
 as 
-select * 
-from bikes 
-where rundate between '2017-04-01' and '2017-04-30';
+SELECT * 
+FROM bikes 
+WHERE rundate between '2017-04-01' and '2017-04-30';
 
 COPY bike_rides_april
 TO 'bike_rides_april.csv' (HEADER, DELIMITER ',');
@@ -201,7 +201,7 @@ TO 'bike_rides_april.json' (FORMAT JSON, dateformat '%d %B %Y');
 
 COPY bike_rides_april 
 TO 'bike_rides' 
-(FORMAT PARQUET, PARTITION_BY (rundate));
+(FORMAT PARQUET, PARTITION_BY (rundate), OVERWRITE_OR_IGNORE true);
 ```
 
 # Exporting a database
