@@ -146,6 +146,8 @@ PIVOT web_cte ON language_name USING count(*);
 
 ## Join data from multiple tables
 ```sql
+INSTALL httpfs; 
+LOAD httpfs; 
 
 CREATE OR REPLACE TABLE trips
 AS
