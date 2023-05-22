@@ -76,7 +76,10 @@ WHERE year = 2015;
 DROP TABLE IF EXISTS book_reviews_2015;
 
 .shell rm -fr book_reviews_hive;
+```
 
+## Optimizing performance of DuckDB
+```sql
 -- Pushdown
 
 -- create a fake file
@@ -87,15 +90,18 @@ COPY (
 ) TO 'reviews_huge.parquet' (compression uncompressed);
 ;
 
-EXPLAIN SELECT * 
-FROM read_parquet('./reviews_huge.parquet') 
-WHERE marketplace='DE' ;
+-- return the current number of threads
+SELECT current_setting('threads');
+
+
+-- configure to use only 1 thread
+SET threads TO 1;
 
 PRAGMA enable_optimizer;
 PRAGMA enable_profiling;
 PRAGMA profiling_output='profile_with_pushdown.log';
 --
-CREATE OR REPLACE TABLE BOOK_REVIEWS
+CREATE OR REPLACE TABLE book_reviews_jp_2015
 AS
 SELECT * 
 FROM read_parquet('./reviews_huge*.parquet') 
@@ -109,7 +115,7 @@ PRAGMA disable_optimizer;
 PRAGMA enable_profiling;
 PRAGMA profiling_output='profile_without_pushdown.log';
 --
-CREATE OR REPLACE TABLE BOOK_REVIEWS
+CREATE OR REPLACE TABLE book_reviews_jp_2015
 AS
 SELECT * 
 FROM read_parquet('./reviews_huge*.parquet') 
@@ -118,7 +124,29 @@ AND year = 2015 ;
 --
 PRAGMA disable_profiling;
 
+DROP TABLE IF EXISTS book_reviews_jp_2015;
+
+-- close and restart DuckDB
+CALL pragma_database_size();
+
+CREATE OR REPLACE TABLE book_reviews
+AS
+SELECT *
+FROM read_parquet('./reviews_original.parquet');
+
+create  index book_reviews_idx3 on book_reviews(marketplace, star_rating);
+-- adds 0.3GB
+drop index if exists book_reviews_idx3;
+
+create  index book_reviews_idx3 on book_reviews(review_headline);
+-- adds 0.8GB
+
+SELECT * FROM   duckdb_indexes;
+
+duckdb_indexes();
+
 ```
+
 
 ## Timestamp With Time Zone Functions
 ```sql
@@ -127,11 +155,21 @@ PRAGMA disable_profiling;
 
 ## Window Functions
 ```sql
+CREATE OR REPLACE TABLE appolo_events
+AS
+SELECT * 
+FROM read_csv('apollo.csv', auto_detect=true, header=true, timestampformat='%d/%b/%Y %H:%M');
+
+
+SELECT event_description, 
+event_time, 
+astronaut, astronaut_location, 
+LEAD(event_time, 1) OVER(PARTITION BY astronaut ORDER BY event_time) as end_time,
+end_time-event_time
+FROM appolo_events
+ORDER BY astronaut, event_time;
+
 
 ```
 
-## Optimizing performance of DuckDB
-```sql
-
-```
 
