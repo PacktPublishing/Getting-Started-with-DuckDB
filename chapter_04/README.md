@@ -151,6 +151,10 @@ duckdb_indexes();
 ## Timestamp With Time Zone Functions
 ```sql
 
+select strptime('July 21 1969 02:56 UTC', '%B %d %Y %H:%M %Z') AT TIME ZONE 'UTC';
+
+select strptime('July 21 1969 02:56 UTC', '%B %d %Y %H:%M %Z') AT TIME ZONE 'America/New_York';
+
 ```
 
 ## Window Functions
