@@ -16,23 +16,6 @@ SELECT *
 FROM book_reviews
 USING SAMPLE 10;
 
-ALTER TABLE book_reviews ADD book_reviews_id INT;
-
-UPDATE book_reviews 
-SET book_reviews_id = rowid;
-
-ALTER TABLE book_reviews ALTER book_reviews_id SET NOT NULL;
-
-CREATE UNIQUE INDEX book_reviews_pk on book_reviews(book_reviews_id);
-
-EXPLAIN SELECT *
-FROM book_reviews
-WHERE book_reviews_id = 1;
-
-SELECT year, count(*)
-FROM book_reviews
-GROUP BY 1;
-
 CREATE INDEX book_reviews_idx 
 ON book_reviews(year);
 
@@ -49,19 +32,44 @@ WHERE year = 2015;
 -- close and restart DuckDB
 CALL pragma_database_size();
 
+-- create in-memory
 CREATE OR REPLACE TABLE book_reviews
 AS
 SELECT *
 FROM read_parquet('./reviews_original.parquet');
 
-create  index book_reviews_idx3 on book_reviews(marketplace, star_rating);
--- adds 0.3GB
-drop index if exists book_reviews_idx3;
+CALL pragma_database_size();
 
-create  index book_reviews_idx3 on book_reviews(review_headline);
+-- close memory db and open disk database
+
+.open newdb.db
+
+-- create on disk
+CREATE OR REPLACE TABLE book_reviews
+AS
+SELECT *
+FROM read_parquet('./reviews_original.parquet');
+
+CALL pragma_database_size();
+
+CREATE INDEX book_reviews_idx1 
+ON book_reviews(marketplace, star_rating);
+
+CALL pragma_database_size();
+
+-- adds 0.3GB
+DROP INDEX IF EXISTS book_reviews_idx1;
+
+CALL pragma_database_size();
+
+CREATE INDEX book_reviews_idx2 
+ON book_reviews(review_headline);
 -- adds 0.8GB
 
-SELECT * FROM   duckdb_indexes;
+CALL pragma_database_size();
+
+SELECT * 
+FROM duckdb_indexes;
 
 DROP TABLE IF EXISTS book_reviews;
 
