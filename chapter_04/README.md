@@ -238,14 +238,25 @@ ORDER BY event_time;
 
 SELECT TIMESTAMP '1969-07-21 05:09:00' - TIMESTAMP '1969-07-21 02:56:00' as interval_on_moon;
 
+CREATE OR REPLACE VIEW apollo_activities
+AS
 SELECT event_description, 
 event_time, 
-astronaut, astronaut_location, 
+astronaut, 
+astronaut_location, 
 LEAD(event_time, 1) OVER(PARTITION BY astronaut ORDER BY event_time) as end_time,
 end_time-event_time as event_duration
-FROM apollo_events
+FROM apollo_events;
+
+SELECT *
+FROM apollo_activities
 WHERE astronaut = 'Neil Armstrong'
 ORDER BY astronaut, event_time;
+
+SELECT *
+FROM apollo_activities
+WHERE astronaut_location = 'Moon'
+ORDER BY event_time;
 ```
 
 
