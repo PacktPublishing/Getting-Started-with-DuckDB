@@ -2,6 +2,9 @@
 
 ## DuckDB indexes 
 ```sql
+
+INSTALL httpfs;
+
 COPY (
     SELECT * 
     FROM read_parquet('s3://amazon-reviews-pds/parquet/product_category=Books/part-0000[0]*-*.parquet')
@@ -12,22 +15,37 @@ AS
 SELECT *
 FROM read_parquet('./reviews_original.parquet');
 
+SUMMARIZE book_reviews;
+
 SELECT * 
 FROM book_reviews
 USING SAMPLE 10;
 
-CREATE INDEX book_reviews_idx 
+EXPLAIN SELECT count(*)
+FROM book_reviews
+WHERE customer_id = '41775808';
+
+EXPLAIN SELECT count(*)
+FROM book_reviews
+WHERE year = '2015';
+
+CREATE INDEX book_reviews_idx_customer_id 
+ON book_reviews(customer_id);
+
+CREATE INDEX book_reviews_idx_year 
 ON book_reviews(year);
 
--- selecting a year which is sparse
-EXPLAIN SELECT count(*)
-FROM book_reviews
-WHERE year = 1995;
 
--- selecting a year which is common
 EXPLAIN SELECT count(*)
 FROM book_reviews
-WHERE year = 2015;
+WHERE customer_id = '41775808';
+
+EXPLAIN SELECT count(*)
+FROM book_reviews
+WHERE year = '2015';
+
+
+
 
 -- close and restart DuckDB
 .open
