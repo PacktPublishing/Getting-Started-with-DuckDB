@@ -30,21 +30,11 @@ FROM book_reviews
 WHERE year = 2015;
 
 -- close and restart DuckDB
+.open
+
 CALL pragma_database_size();
 
 -- create in-memory
-CREATE OR REPLACE TABLE book_reviews
-AS
-SELECT *
-FROM read_parquet('./reviews_original.parquet');
-
-CALL pragma_database_size();
-
--- close memory db and open disk database
-
-.open newdb.db
-
--- create on disk
 CREATE OR REPLACE TABLE book_reviews
 AS
 SELECT *
@@ -57,14 +47,24 @@ ON book_reviews(marketplace, star_rating);
 
 CALL pragma_database_size();
 
--- adds 0.3GB
-DROP INDEX IF EXISTS book_reviews_idx1;
+
+-- close memory db and open disk database
+.shell rm -f newdb.db;
+
+.open newdb.db
 
 CALL pragma_database_size();
 
-CREATE INDEX book_reviews_idx2 
-ON book_reviews(review_headline);
--- adds 0.8GB
+-- create on disk
+CREATE OR REPLACE TABLE book_reviews
+AS
+SELECT *
+FROM read_parquet('./reviews_original.parquet');
+
+CALL pragma_database_size();
+
+CREATE INDEX book_reviews_idx1 
+ON book_reviews(marketplace, star_rating);
 
 CALL pragma_database_size();
 
@@ -208,18 +208,25 @@ FROM timestamp_demo;
 
 ## Window Functions
 ```sql
-CREATE OR REPLACE TABLE appolo_events
+CREATE OR REPLACE TABLE apollo_events
 AS
 SELECT * 
 FROM read_csv('apollo.csv', auto_detect=true, header=true, timestampformat='%d/%b/%Y %H:%M');
 
+SELECT *
+FROM apollo_events
+WHERE astronaut = 'Neil Armstrong'
+ORDER BY event_time;
+
+SELECT TIMESTAMP '1969-07-21 05:09:00' - TIMESTAMP '1969-07-21 02:56:00' as interval_on_moon;
 
 SELECT event_description, 
 event_time, 
 astronaut, astronaut_location, 
 LEAD(event_time, 1) OVER(PARTITION BY astronaut ORDER BY event_time) as end_time,
-end_time-event_time
-FROM appolo_events
+end_time-event_time as event_duration
+FROM apollo_events
+WHERE astronaut = 'Neil Armstrong'
 ORDER BY astronaut, event_time;
 ```
 

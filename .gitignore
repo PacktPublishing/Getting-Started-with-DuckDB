@@ -13,3 +13,4 @@ chapter_04/*.parquet
 chapter_04/book_reviews_hive/*
 chapter_04/profile*.log
 chapter_04/*.db
+*.wal

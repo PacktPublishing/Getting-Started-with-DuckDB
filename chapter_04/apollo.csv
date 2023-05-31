@@ -1,21 +1,21 @@
 event_time,astronaut,event_description,astronaut_location
-14/Jul/1969 21:00,Neil,Enterered Apollo 11 command module,Command module
-14/Jul/1969 21:00,Buzz,Enterered Apollo 11 command module,Command module
-14/Jul/1969 21:00,Michael,Enterered Apollo 11 command module,Command module
+14/Jul/1969 21:00,Neil Armstrong,Enterered Apollo 11 command module,Command module
+14/Jul/1969 21:00,Buzz Aldrin,Enterered Apollo 11 command module,Command module
+14/Jul/1969 21:00,Michael Collins,Enterered Apollo 11 command module,Command module
 16/Jul/1969 13:32,,Liftoff,
-20/Jul/1969 14:32,Neil,Entered Apollo Lunar Module,Lunar module in space
-20/Jul/1969 15:02,Buzz,Entered Apollo Lunar Module,Lunar module in space
-20/Jul/1969 20:17,Neil,Apollo Lunar Module lunar landing,Lunar module on moon
-20/Jul/1969 20:17,Buzz,Apollo Lunar Module lunar landing,Lunar module on moon
-21/Jul/1969 2:56,Neil,"First step on lunar surface, That's one small step for a man",Moon
-21/Jul/1969 3:15,Buzz,Buzz on lunar surface,Moon
-21/Jul/1969 5:01,Buzz,Returned inside Apollo Lunar Module,Lunar module on moon
-21/Jul/1969 5:09,Neil,Returned inside Apollo Lunar Module,Lunar module on moon
-21/Jul/1969 17:54,Neil,Apollo Lunar Module lunar liftoff ignition ,Lunar module in space
-21/Jul/1969 17:54,Buzz,Apollo Lunar Module lunar liftoff ignition ,Lunar module in space
-21/Jul/1969 22:52,Neil,Entered Command module,Command module
-21/Jul/1969 23:17,Buzz,Entered Command module,Command module
+20/Jul/1969 14:32,Neil Armstrong,Entered Apollo Lunar Module,Lunar module in space
+20/Jul/1969 15:02,Buzz Aldrin,Entered Apollo Lunar Module,Lunar module in space
+20/Jul/1969 20:17,Neil Armstrong,Apollo Lunar Module lunar landing,Lunar module on moon
+20/Jul/1969 20:17,Buzz Aldrin,Apollo Lunar Module lunar landing,Lunar module on moon
+21/Jul/1969 2:56,Neil Armstrong,"First step on lunar surface, That's one small step for a man",Moon
+21/Jul/1969 3:15,Buzz Aldrin,Buzz Aldrin on lunar surface,Moon
+21/Jul/1969 5:01,Buzz Aldrin,Returned inside Apollo Lunar Module,Lunar module on moon
+21/Jul/1969 5:09,Neil Armstrong,Returned inside Apollo Lunar Module,Lunar module on moon
+21/Jul/1969 17:54,Neil Armstrong,Apollo Lunar Module lunar liftoff ignition ,Lunar module in space
+21/Jul/1969 17:54,Buzz Aldrin,Apollo Lunar Module lunar liftoff ignition ,Lunar module in space
+21/Jul/1969 22:52,Neil Armstrong,Entered Command module,Command module
+21/Jul/1969 23:17,Buzz Aldrin,Entered Command module,Command module
 24/Jul/1969 16:50,,Splashdown,
-24/Jul/1969 17:29,Neil,Egress,Recovery ship
-24/Jul/1969 17:29,Buzz,Egress,Recovery ship
-24/Jul/1969 17:29,Michael,Egress,Recovery ship
+24/Jul/1969 17:29,Neil Armstrong,Egress,Recovery ship
+24/Jul/1969 17:29,Buzz Aldrin,Egress,Recovery ship
+24/Jul/1969 17:29,Michael Collins,Egress,Recovery ship
