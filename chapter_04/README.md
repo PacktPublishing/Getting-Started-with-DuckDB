@@ -186,6 +186,10 @@ DROP TABLE IF EXISTS book_reviews_2015_JP;
 ## Timestamp With Time Zone Functions
 ```sql
 
+SELECT TIMESTAMP '1969-07-21 02:56:00';
+
+SELECT TIMESTAMPTZ '1969-07-20 22:56:00-04';
+
 SET timezone = 'UTC';
 
 CREATE OR REPLACE TABLE timestamp_demo (
@@ -226,6 +230,7 @@ FROM timestamp_demo;
 
 ## Window Functions
 ```sql
+
 CREATE OR REPLACE TABLE apollo_events
 AS
 SELECT * 
