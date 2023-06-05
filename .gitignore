@@ -16,3 +16,4 @@ chapter_04/*.db
 *.wal
 */archive/*
 chapter_05/demo.db
+chapter_05/reviews_original.parquet
