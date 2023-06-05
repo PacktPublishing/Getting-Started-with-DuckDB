@@ -35,6 +35,8 @@ ON book_reviews(customer_id);
 CREATE INDEX book_reviews_idx_year 
 ON book_reviews(year);
 
+SELECT * 
+FROM duckdb_indexes;
 
 EXPLAIN SELECT count(*)
 FROM book_reviews
