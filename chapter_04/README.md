@@ -1,7 +1,41 @@
 # Chapter 04
 
+# How to download the dataset
+
+The dataset for this project is hosted by Kaggle. To download the necessary dataset for this project, please follow the instructions below.
+
+1. Go to https://www.kaggle.com/datasets/mohamedbakhet/amazon-books-reviews
+2. Click on the 'Download All' button
+3. Kaggle will prompt you to sign in or to register. If you do not have a Kaggle account, you can register for one.
+4. Upon signing in, the download will start automatically.
+5. After the download is complete, unzip the "archive" zip file
+
+
 ## DuckDB indexes 
 ```sql
+
+
+-- -- https://www.kaggle.com/datasets/snap/amazon-fine-food-reviews
+
+-- SUMMARIZE
+-- SELECT *
+-- FROM read_csv('amazonfood/Reviews.csv',  AUTO_DETECT=TRUE);
+
+
+-- https://www.kaggle.com/datasets/mohamedbakhet/amazon-books-reviews
+
+SUMMARIZE
+SELECT *
+FROM read_csv('amazongbook/Books_rating.csv',  AUTO_DETECT=TRUE);
+
+
+SUMMARIZE
+SELECT *
+FROM read_csv('amazongbook/books_data.csv',  AUTO_DETECT=TRUE);
+
+
+
+
 
 INSTALL httpfs;
 

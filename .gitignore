@@ -17,3 +17,8 @@ chapter_04/*.db
 */archive/*
 chapter_05/demo.db
 chapter_05/reviews_original.parquet
+chapter_04/movies/*
+chapter_04/wine/*
+chapter_04/amazon*
+chapter_04/data.csv
+chapter_04/insertions*
