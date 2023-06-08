@@ -18,20 +18,6 @@ unzip archive.zip
 ## DuckDB indexes 
 ```sql
 
-
--- -- https://www.kaggle.com/datasets/snap/amazon-fine-food-reviews
-
--- SUMMARIZE
--- SELECT *
--- FROM read_csv('amazonfood/Reviews.csv',  AUTO_DETECT=TRUE);
-
-
--- https://www.kaggle.com/datasets/mohamedbakhet/amazon-books-reviews
-
--- SUMMARIZE
--- SELECT *
--- FROM read_csv('./Books_rating.csv',  AUTO_DETECT=TRUE);
-
 -- Allow unused blocks to be offloaded to disk if required
 PRAGMA temp_directory='./tmp.tmp';
 
@@ -50,29 +36,9 @@ COPY (
     "review/text" as review_text,
     "review/score" as review_score
     FROM read_csv('./Books_rating.csv',  AUTO_DETECT=TRUE) bk 
-    CROSS JOIN (select range, case when range=0 then 'JP' when range=1 then 'GB' else 'US' end as region from range (0, 4))
+    CROSS JOIN (SELECT range, case when range=0 then 'JP' else 'US' end as region FROM range (0, 2))
 ) TO 'book_reviews.parquet';
 
--- select * from  read_csv('./Books_rating.csv',  AUTO_DETECT=TRUE) bk ;
-
--- SUMMARIZE
--- SELECT *
--- FROM read_csv('./books_data.csv',  AUTO_DETECT=TRUE);
-
--- silly bits to remove
--- select review_year, count(*) from book_reviews group by 1 order by 2 desc;
-
--- CROSS JOIN (select range from range (0, 10)
-
--- select range, case when range=0 then 'JP' when range=1 then 'GP' else 'US' end from range (0, 10);
-
-
--- INSTALL httpfs;
-
--- COPY (
---     SELECT * 
---     FROM read_parquet('s3://amazon-reviews-pds/parquet/product_category=Books/part-0000[0]*-*.parquet')
--- ) TO 'book_reviews.parquet' (compression uncompressed);
 
 CREATE OR REPLACE TABLE book_reviews
 AS
@@ -127,7 +93,7 @@ FROM read_parquet('./book_reviews.parquet');
 CALL pragma_database_size();
 
 CREATE INDEX book_reviews_idx1 
-ON book_reviews(region, star_rating);
+ON book_reviews(region, review_score);
 
 CALL pragma_database_size();
 
@@ -166,15 +132,6 @@ DROP TABLE IF EXISTS book_reviews;
 -- configure to use only 1 thread
 SET threads TO 1;
 
--- COPY (
---     SELECT * 
---     FROM read_parquet('./book_reviews.parquet')
--- ) TO 'book_reviews_hive' (
---     format parquet, 
---     partition_by (year, region), 
---     overwrite_or_ignore true
--- );
-
 COPY (
     SELECT * 
     FROM read_parquet('./book_reviews.parquet')
@@ -209,17 +166,8 @@ DROP TABLE IF EXISTS book_reviews_2012;
 -- Reset to default number of threads
 reset threads;
 
--- -- create a fake file
--- COPY (
---     SELECT rv.*
---     FROM read_parquet('./book_reviews.parquet') rv CROSS JOIN (select range from range (0, 10)
---     where (range=1 or region<>'JP'))
--- ) TO 'reviews_huge.parquet' (compression uncompressed);
--- ;
-
 -- return the current number of threads
 SELECT current_setting('threads');
-
 
 -- configure to use only 1 thread
 SET threads TO 1;
