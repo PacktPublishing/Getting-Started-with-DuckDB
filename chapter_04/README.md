@@ -5,11 +5,15 @@
 The dataset for this project is hosted by Kaggle. To download the necessary dataset for this project, please follow the instructions below.
 
 1. Go to https://www.kaggle.com/datasets/mohamedbakhet/amazon-books-reviews
-2. Click on the 'Download All' button
+2. Click on the 'Download' button
 3. Kaggle will prompt you to sign in or to register. If you do not have a Kaggle account, you can register for one.
 4. Upon signing in, the download will start automatically.
 5. After the download is complete, unzip the "archive" zip file
 
+```bash
+cd chapter_04 
+unzip archive.zip
+``` 
 
 ## DuckDB indexes 
 ```sql
@@ -24,30 +28,56 @@ The dataset for this project is hosted by Kaggle. To download the necessary data
 
 -- https://www.kaggle.com/datasets/mohamedbakhet/amazon-books-reviews
 
-SUMMARIZE
-SELECT *
-FROM read_csv('amazongbook/Books_rating.csv',  AUTO_DETECT=TRUE);
+-- SUMMARIZE
+-- SELECT *
+-- FROM read_csv('./Books_rating.csv',  AUTO_DETECT=TRUE);
 
+-- Allow unused blocks to be offloaded to disk if required
+PRAGMA temp_directory='./tmp.tmp';
 
-SUMMARIZE
-SELECT *
-FROM read_csv('amazongbook/books_data.csv',  AUTO_DETECT=TRUE);
-
-
-
-
-
-INSTALL httpfs;
+CREATE OR REPLACE SEQUENCE book_reviews_seq;
 
 COPY (
-    SELECT * 
-    FROM read_parquet('s3://amazon-reviews-pds/parquet/product_category=Books/part-0000[0]*-*.parquet')
-) TO 'reviews_original.parquet' (compression uncompressed);
+    SELECT nextval('book_reviews_seq') as book_reviews_id,
+    Id as book_id,
+    Title as book_title,
+    Price as price,
+    User_id as user_id,
+    region,
+    to_timestamp("review/time") as review_time,
+    cast(datepart('year', review_time) as VARCHAR) as review_year,
+    "review/summary" as review_summary, 
+    "review/text" as review_text,
+    "review/score" as review_score
+    FROM read_csv('./Books_rating.csv',  AUTO_DETECT=TRUE) bk 
+    CROSS JOIN (select range, case when range=0 then 'JP' when range=1 then 'GB' else 'US' end as region from range (0, 4))
+) TO 'book_reviews.parquet';
+
+-- select * from  read_csv('./Books_rating.csv',  AUTO_DETECT=TRUE) bk ;
+
+-- SUMMARIZE
+-- SELECT *
+-- FROM read_csv('./books_data.csv',  AUTO_DETECT=TRUE);
+
+-- silly bits to remove
+-- select review_year, count(*) from book_reviews group by 1 order by 2 desc;
+
+-- CROSS JOIN (select range from range (0, 10)
+
+-- select range, case when range=0 then 'JP' when range=1 then 'GP' else 'US' end from range (0, 10);
+
+
+-- INSTALL httpfs;
+
+-- COPY (
+--     SELECT * 
+--     FROM read_parquet('s3://amazon-reviews-pds/parquet/product_category=Books/part-0000[0]*-*.parquet')
+-- ) TO 'book_reviews.parquet' (compression uncompressed);
 
 CREATE OR REPLACE TABLE book_reviews
 AS
 SELECT *
-FROM read_parquet('./reviews_original.parquet');
+FROM read_parquet('./book_reviews.parquet');
 
 SUMMARIZE book_reviews;
 
@@ -57,28 +87,28 @@ USING SAMPLE 10;
 
 EXPLAIN SELECT count(*)
 FROM book_reviews
-WHERE customer_id = '41775808';
+WHERE user_id = 'A1WQVN65FTJCJ6';
 
 EXPLAIN SELECT count(*)
 FROM book_reviews
-WHERE year = '2015';
+WHERE review_year = '2012';
 
-CREATE INDEX book_reviews_idx_customer_id 
-ON book_reviews(customer_id);
+CREATE INDEX book_reviews_idx_user_id 
+ON book_reviews(user_id);
 
 CREATE INDEX book_reviews_idx_year 
-ON book_reviews(year);
+ON book_reviews(review_year);
 
 SELECT * 
 FROM duckdb_indexes;
 
 EXPLAIN SELECT count(*)
 FROM book_reviews
-WHERE customer_id = '41775808';
+WHERE user_id = 'A1RRTLWXDOYER5';
 
 EXPLAIN SELECT count(*)
 FROM book_reviews
-WHERE year = '2015';
+WHERE review_year = '2012';
 
 
 
@@ -92,12 +122,12 @@ CALL pragma_database_size();
 CREATE OR REPLACE TABLE book_reviews
 AS
 SELECT *
-FROM read_parquet('./reviews_original.parquet');
+FROM read_parquet('./book_reviews.parquet');
 
 CALL pragma_database_size();
 
 CREATE INDEX book_reviews_idx1 
-ON book_reviews(marketplace, star_rating);
+ON book_reviews(region, star_rating);
 
 CALL pragma_database_size();
 
@@ -113,12 +143,12 @@ CALL pragma_database_size();
 CREATE OR REPLACE TABLE book_reviews
 AS
 SELECT *
-FROM read_parquet('./reviews_original.parquet');
+FROM read_parquet('./book_reviews.parquet');
 
 CALL pragma_database_size();
 
 CREATE INDEX book_reviews_idx1 
-ON book_reviews(marketplace, star_rating);
+ON book_reviews(region, star_rating);
 
 CALL pragma_database_size();
 
@@ -136,32 +166,41 @@ DROP TABLE IF EXISTS book_reviews;
 -- configure to use only 1 thread
 SET threads TO 1;
 
+-- COPY (
+--     SELECT * 
+--     FROM read_parquet('./book_reviews.parquet')
+-- ) TO 'book_reviews_hive' (
+--     format parquet, 
+--     partition_by (year, region), 
+--     overwrite_or_ignore true
+-- );
+
 COPY (
     SELECT * 
-    FROM read_parquet('./reviews_original.parquet')
+    FROM read_parquet('./book_reviews.parquet')
 ) TO 'book_reviews_hive' (
     format parquet, 
-    partition_by (year, marketplace), 
+    partition_by (review_year, region), 
     overwrite_or_ignore true
 );
 
 .timer on
  
-CREATE OR REPLACE TABLE book_reviews_2015_JP
+CREATE OR REPLACE TABLE book_reviews_2012_JP
 AS
 SELECT * 
 FROM parquet_scan('book_reviews_hive/*/*/*.parquet', hive_partitioning=true)  
-WHERE year='2015' 
-AND marketplace='JP';
+WHERE review_year='2012' 
+AND region='JP';
 
-CREATE OR REPLACE TABLE book_reviews_2015_JP
+CREATE OR REPLACE TABLE book_reviews_2012_JP
 AS
 SELECT * 
-FROM read_parquet('./reviews_original.parquet')  
-WHERE year='2015' 
-AND marketplace='JP';
+FROM read_parquet('./book_reviews.parquet')  
+WHERE review_year='2012' 
+AND region='JP';
 
-DROP TABLE IF EXISTS book_reviews_2015;
+DROP TABLE IF EXISTS book_reviews_2012;
 
 .shell rm -fr book_reviews_hive;
 
@@ -170,13 +209,13 @@ DROP TABLE IF EXISTS book_reviews_2015;
 -- Reset to default number of threads
 reset threads;
 
--- create a fake file
-COPY (
-    SELECT rv.*
-    FROM read_parquet('./reviews_original.parquet') rv CROSS JOIN (select range from range (0, 10)
-    where (range=1 or marketplace<>'JP'))
-) TO 'reviews_huge.parquet' (compression uncompressed);
-;
+-- -- create a fake file
+-- COPY (
+--     SELECT rv.*
+--     FROM read_parquet('./book_reviews.parquet') rv CROSS JOIN (select range from range (0, 10)
+--     where (range=1 or region<>'JP'))
+-- ) TO 'reviews_huge.parquet' (compression uncompressed);
+-- ;
 
 -- return the current number of threads
 SELECT current_setting('threads');
@@ -189,32 +228,32 @@ PRAGMA enable_optimizer;
 PRAGMA enable_profiling;
 PRAGMA profiling_output='profile_with_pushdown.log';
 --
-CREATE OR REPLACE TABLE book_reviews_2015_JP
+CREATE OR REPLACE TABLE book_reviews_1995_JP
 AS
-SELECT marketplace, product_title, review_headline, review_date, year, product_category
-FROM read_parquet('./reviews_huge*.parquet') 
-WHERE marketplace='JP' 
-AND year = 2015 ;
+SELECT region, review_summary, review_text, review_time, review_year
+FROM read_parquet('./book_reviews.parquet') 
+WHERE region='JP' 
+AND review_year = '1995' ;
 --
 PRAGMA disable_profiling;
 
 
-select * from book_reviews_2015_JP;
+select * from book_reviews_1995_JP;
 
 PRAGMA disable_optimizer;
 PRAGMA enable_profiling;
 PRAGMA profiling_output='profile_without_pushdown.log';
 --
-CREATE OR REPLACE TABLE book_reviews_2015_JP
+CREATE OR REPLACE TABLE book_reviews_1995_JP
 AS
-SELECT marketplace, product_title, review_headline, review_date, year, product_category
-FROM read_parquet('./reviews_huge*.parquet') 
-WHERE marketplace='JP' 
-AND year = 2015 ;
+SELECT region, review_summary, review_text, review_time, review_year
+FROM read_parquet('./book_reviews.parquet') 
+WHERE region='JP' 
+AND review_year = '1995' ;
 --
 PRAGMA disable_profiling;
 
-DROP TABLE IF EXISTS book_reviews_2015_JP;
+DROP TABLE IF EXISTS book_reviews_1995_JP;
 
 ```
 

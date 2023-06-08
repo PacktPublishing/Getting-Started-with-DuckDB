@@ -22,30 +22,68 @@ SET s3_access_key_id=''; -- add AWS access key id here if not public
 SET s3_secret_access_key=''; -- add AWS secret access key here if not public
 
 
-COPY (
-    SELECT review_id, product_title, review_headline, star_rating
-    FROM read_parquet('s3://amazon-reviews-pds/parquet/*/part-0000[0]*-*.parquet', hive_partitioning=True)
-    WHERE product_category='Books'
-) TO 'reviews_original.parquet';
+-- COPY (
+--     SELECT review_id, product_title, review_headline, star_rating
+--     FROM read_parquet('s3://amazon-reviews-pds/parquet/*/part-0000[0]*-*.parquet', hive_partitioning=True)
+--     WHERE product_category='Books'
+-- ) TO 'reviews_original.parquet';
 
 
-CREATE OR REPLACE TABLE book_reviews
+-- CREATE OR REPLACE TABLE book_reviews
+-- AS
+-- SELECT *
+-- FROM read_parquet('./reviews_original.parquet');
+
+-- Allow unused blocks to be offloaded to disk if required
+PRAGMA temp_directory='./tmp.tmp';
+
+
+SUMMARIZE
+
+CREATE OR REPLACE SEQUENCE book_details_seq;
+
+CREATE OR REPLACE TABLE book_details
 AS
-SELECT *
-FROM read_parquet('./reviews_original.parquet');
+SELECT nextval('book_details_seq') as book_details_id,
+"Title" as book_title, 
+description as book_description
+FROM read_csv('../chapter_04/books_data.csv',  AUTO_DETECT=TRUE);
 
+
+-- CREATE OR REPLACE TABLE book_reviews
+-- AS
+-- SELECT min(book_reviews_id) as book_reviews_id, book_title, review_summary, review_text
+-- FROM read_parquet('../chapter_04/book_reviews.parquet')
+-- WHERE region = 'GB'
+-- GROUP BY book_title, review_summary, review_text;
+
+SUMMARIZE book_details;
 
 INSTALL fts; 
 LOAD fts;
 
-PRAGMA create_fts_index('book_reviews', 'review_id', 'product_title', 'review_headline', overwrite='TRUE');
+-- PRAGMA create_fts_index('book_reviews', 'book_reviews_id', 'book_title', 'review_summary', 'review_text', overwrite='TRUE');
+
+-- WITH cte AS
+-- (
+--     SELECT *, fts_main_book_reviews.match_bm25(book_reviews_id, 'travel france food') AS match_score
+--     FROM book_reviews
+-- )
+-- SELECT book_title, review_summary, review_text, match_score
+-- FROM cte
+-- WHERE match_score IS NOT NULL
+-- ORDER BY match_score DESC
+-- LIMIT 10;
+
+
+PRAGMA create_fts_index('book_details', 'book_details_id', 'book_title', 'book_description', overwrite='TRUE');
 
 WITH cte AS
 (
-    SELECT *, fts_main_book_reviews.match_bm25(review_id, 'travel france wine') AS match_score
-    FROM book_reviews
+    SELECT *, fts_main_book_details.match_bm25(book_details_id, 'travel france wine') AS match_score
+    FROM book_details
 )
-SELECT product_title, review_headline, match_score, star_rating
+SELECT book_title, book_description, match_score
 FROM cte
 WHERE match_score IS NOT NULL
 ORDER BY match_score DESC
