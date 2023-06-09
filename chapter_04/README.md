@@ -113,8 +113,6 @@ FROM read_parquet('./book_reviews.parquet');
 
 CALL pragma_database_size();
 
-CREATE INDEX book_reviews_idx1 
-ON book_reviews(region, star_rating);
 
 CALL pragma_database_size();
 
