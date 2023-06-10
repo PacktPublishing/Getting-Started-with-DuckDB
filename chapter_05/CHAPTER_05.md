@@ -1,37 +1,42 @@
 # Chapter 05
 
-## Full-Text Search Indexes
+## DuckDB Extensions
 
 ```sql
 
-SELECT * 
+SELECT extension_name,
+description,
+installed,
+loaded,
+install_path
 FROM duckdb_extensions();
 
-LOAD json;
 INSTALL json;
+LOAD json;
+
+SELECT extension_name,
+installed,
+loaded
+FROM duckdb_extensions()
+WHERE extension_name = 'json';
+
 
 SELECT * 
 FROM read_json('./countries.json', auto_detect=true, format='auto');
 
-
-LOAD httpfs;
+-- Reading remote files with the httpfs extension
 INSTALL httpfs;
+LOAD httpfs;
 
 SELECT *
-FROM read_csv('https://www2.census.gov/programs-surveys/stc/datasets/2022/FY2022-Flat-File.txt', AUTO_DETECT=TRUE);
-
-
+FROM read_csv('https://www2.census.gov/programs-surveys/popest/datasets/2020-2022/cities/totals/sub-est2022.csv', AUTO_DETECT=TRUE);
 
 SELECT * 
 FROM duckdb_settings()
 WHERE name like 's3%';
 
-
 SET s3_region='us-east-1';
 SET s3_endpoint='s3.amazonaws.com';
-SET s3_access_key_id=''; -- add AWS access key id here if not public
-SET s3_secret_access_key=''; -- add AWS secret access key here if not public
-
 
 SELECT *
 FROM read_parquet('s3://duckdb-s3-bucket-public/countries.parquet');
@@ -50,8 +55,9 @@ FROM read_csv('../chapter_04/books_data.csv',  AUTO_DETECT=TRUE);
 
 SUMMARIZE book_details;
 
-INSTALL fts; 
+-- full-text search indexes
 LOAD fts;
+INSTALL fts; 
 
 PRAGMA create_fts_index('book_details', 'book_details_id', 'book_title', 'book_description', overwrite='TRUE');
 
@@ -70,18 +76,8 @@ LIMIT 10;
 ## Geo-spatial extension
 
 ```sql
-
 INSTALL spatial; 
 LOAD spatial; 
-
--- reading Excel XLSX files
-CREATE OR REPLACE TABLE stations AS
-SELECT * 
-FROM st_read('stations.xlsx', layer='stations');
-
-SELECT *
-FROM stations
-WHERE station_name in ('Paris Montparnasse', 'Bordeaux');
 
 SELECT st_point(48.858935, 2.293412) AS Eiffel_Tower;
 
@@ -93,21 +89,29 @@ st_distance(
   st_transform(Arc_de_Triomphe, 'EPSG:4326', 'EPSG:27563')
 ) as Aerial_Distance_M;
 
-SELECT wkb_geometry 
+
+SELECT * 
+FROM st_read('stations.xlsx', layer='stations');
+
+-- reading Excel XLSX files
+CREATE OR REPLACE TABLE stations AS
+SELECT * 
+FROM st_read('stations.xlsx', layer='stations');
+
+SELECT wkb_geometry
 FROM st_read('./bordeaux_wine_region.geojson');
 
-
-SELECT station_name, st_point(latitude,longitude), st_point(longitude,latitude)
+SELECT station_name
 FROM stations
 WHERE st_within(st_point(longitude, latitude), 
-  (
-    SELECT  ST_GeomFromWKB(wkb_geometry) 
-    FROM st_read('./bordeaux_wine_region.geojson'))
-  );
+(
+  SELECT  st_geomfromwkb(wkb_geometry) 
+  FROM st_read('./bordeaux_wine_region.geojson'))
+);
 
 ```
 
-##
+## Recursive queries and macros
 
 ```sql
 
@@ -131,6 +135,26 @@ WITH RECURSIVE wine_hierarchy(wine_id, start_with, wine_path) AS
 )
 SELECT wine_path
 FROM wine_hierarchy
-WHERE start_with = 'Mission Haut Blanc';
+WHERE start_with = 'Rothschild';
+
+
+-- macros
+CREATE OR REPLACE TABLE wine_prices AS
+SELECT *
+FROM read_csv('wine_prices.csv', AUTO_DETECT=TRUE);
+
+SELECT wine_name, price, capacity_ml
+FROM wine_prices;
+
+CREATE OR REPLACE MACRO unit_price(price, capacity) 
+AS 
+round(price/capacity, 3);
+
+SELECT wine_name, 
+price, 
+capacity_ml, 
+unit_price(price, capacity_ml) as price_ml
+FROM wine_prices;
 
 ```
+
