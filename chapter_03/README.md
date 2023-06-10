@@ -144,6 +144,21 @@ WITH web_cte as (
 PIVOT web_cte ON language_name USING count(*);
 ```
 
+# How to download the dataset
+
+The dataset for this project is hosted by Kaggle. To download the necessary dataset for this project, please follow the instructions below.
+
+1. Go to https://www.kaggle.com/datasets/shuhengmo/uber-nyc-forhire-vehicles-trip-data-2021
+2. Click on the 'Download' button
+3. Kaggle will prompt you to sign in or to register. If you do not have a Kaggle account, you can register for one.
+4. Upon signing in, the download will start automatically.
+5. After the download is complete, unzip the `archive.zip` zip file into a new `archive` directory
+
+```bash
+cd chapter_03
+unzip -d archive archive.zip 
+``` 
+
 ## Join data from multiple tables
 ```sql
 INSTALL httpfs; 
@@ -152,12 +167,14 @@ LOAD httpfs;
 CREATE OR REPLACE TABLE trips
 AS
 SELECT *
-FROM read_parquet('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet');
+FROM read_parquet('./archive/fhvhv_tripdata_2021-01.parquet');
 
-SELECT tpep_pickup_datetime, 
-trip_distance, 
-fare_amount, 
-tip_amount,  
+summarize trips;
+
+SELECT pickup_datetime, 
+trip_miles, 
+base_passenger_fare, 
+tips,  
 PULocationID, 
 DOLocationID
 FROM trips 
@@ -172,7 +189,7 @@ CREATE OR REPLACE TABLE locations (
 
 INSERT INTO locations(LocationID, Borough, Zone, service_zone)
 SELECT LocationID, Borough, Zone, service_zone
-FROM read_csv('https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv', AUTO_DETECT=TRUE);
+FROM read_csv('./archive/taxi_zone_lookup.csv', AUTO_DETECT=TRUE);
 
 SELECT LocationID, Borough, Zone
 FROM locations
@@ -189,49 +206,49 @@ FROM trips t
 LEFT JOIN locations l_pu on l_pu.LocationID = t.PULocationID 
 LEFT JOIN locations l_do on l_do.LocationID = t.DOLocationID ;
 
-SELECT tpep_pickup_datetime, 
+SELECT pickup_datetime, 
 pick_up_zone, 
 drop_off_zone, 
-trip_distance
+trip_miles
 FROM trips_with_location
 LIMIT 5;
 
 
-SELECT time_bucket(interval '1 day', tpep_pickup_datetime) as day_of,
+SELECT time_bucket(interval '1 day', pickup_datetime) as day_of,
 count(*) as num_trips,
-min(fare_amount) as fare_min,
-max(fare_amount) as fare_max,
-avg(fare_amount) as fare_avg,
-avg(tip_amount) as tip_avg,
-avg(case when Payment_type =1 then tip_amount/fare_amount end)*100 as cc_tip_avg_pct
+min(base_passenger_fare) as fare_min,
+max(base_passenger_fare) as fare_max,
+avg(base_passenger_fare) as fare_avg,
+avg(tips) as tip_avg,
+avg(tips/base_passenger_fare)*100 as cc_tip_avg_pct
 FROM trips_with_location 
-WHERE tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
+WHERE pickup_datetime between '2021-01-20 00:00:00' and '2021-01-29 23:59:59'
 GROUP BY 1
 ORDER BY 1;
 
-SELECT time_bucket(interval '1 day', tpep_pickup_datetime) as day_of,
+SELECT time_bucket(interval '1 day', pickup_datetime) as day_of,
 count(*) as num_trips,
-min(fare_amount) as fare_min,
-max(fare_amount) as fare_max,
-round(avg(fare_amount), 2) as fare_avg,
-round(avg(tip_amount), 2) as tip_avg,
-round(avg(case when Payment_type =1 then tip_amount/fare_amount end)*100, 0) as cc_tip_avg_pct
+min(base_passenger_fare) as fare_min,
+max(base_passenger_fare) as fare_max,
+round(avg(base_passenger_fare), 2) as fare_avg,
+round(avg(tips), 2) as tip_avg,
+round(avg(tips/base_passenger_fare)*100, 0) as cc_tip_avg_pct
 FROM trips_with_location 
-WHERE tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
-and fare_amount>0
+WHERE pickup_datetime between '2021-01-20 00:00:00' and '2021-01-29 23:59:59'
+and base_passenger_fare>0
 GROUP BY 1
 ORDER BY 1;
 
 WITH cte AS (
   SELECT twl.*,
-  max(fare_amount) over  (partition by time_bucket(interval '1 day', tpep_pickup_datetime)) as max_day_fare_amount
+  max(base_passenger_fare) over  (partition by time_bucket(interval '1 day', pickup_datetime)) as max_day_base_passenger_fare
   FROM trips_with_location twl
 )
-SELECT  tpep_pickup_datetime, pick_up_zone, drop_off_zone, fare_amount
+SELECT  pickup_datetime, pick_up_zone, drop_off_zone, base_passenger_fare
 FROM cte
-WHERE fare_amount = max_day_fare_amount
-AND tpep_pickup_datetime between '2023-01-20 00:00:00' and '2023-01-29 23:59:59'
-ORDER BY tpep_pickup_datetime
+WHERE base_passenger_fare = max_day_base_passenger_fare
+AND pickup_datetime between '2021-01-20 00:00:00' and '2021-01-29 23:59:59'
+ORDER BY pickup_datetime
 ;
 ```
 
