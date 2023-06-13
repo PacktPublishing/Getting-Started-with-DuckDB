@@ -172,7 +172,7 @@ CREATE OR REPLACE TABLE locations (
 
 INSERT INTO locations(LocationID, Borough, Zone, service_zone)
 SELECT LocationID, Borough, Zone, service_zone
-FROM read_csv('https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv', AUTO_DETECT=TRUE);
+FROM read_csv('https://d37ci6vzurychx.cloudfront.net/misc/taxi+_zone_lookup.csv', AUTO_DETECT=TRUE);
 
 SELECT LocationID, Borough, Zone
 FROM locations
