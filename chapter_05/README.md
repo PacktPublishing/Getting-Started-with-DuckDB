@@ -4,11 +4,7 @@
 
 ```sql
 
-SELECT extension_name,
-description,
-installed,
-loaded,
-install_path
+SELECT *
 FROM duckdb_extensions();
 
 INSTALL sqlite_scanner;
@@ -43,7 +39,8 @@ SET s3_region='us-east-1';
 SET s3_endpoint='s3.amazonaws.com';
 
 SELECT *
-FROM read_parquet('s3://duckdb-s3-bucket-public/countries.parquet');
+FROM read_parquet('s3://duckdb-s3-bucket-public/countries.parquet')
+WHERE name SIMILAR TO '.*Republic.*';
 
 -- Allow unused blocks to be offloaded to disk if required
 PRAGMA temp_directory='./tmp.tmp';
