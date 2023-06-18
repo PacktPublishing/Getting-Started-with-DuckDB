@@ -57,18 +57,18 @@ FROM read_csv('../chapter_04/books_data.csv',  AUTO_DETECT=TRUE);
 SUMMARIZE book_details;
 
 -- full-text search indexes
-LOAD fts;
 INSTALL fts; 
+LOAD fts;
 
 PRAGMA create_fts_index('book_details', 'book_details_id', 'book_title', 'book_description', overwrite='TRUE');
 
-WITH cte AS
+WITH book_cte AS
 (
     SELECT *, fts_main_book_details.match_bm25(book_details_id, 'travel france wine') AS match_score
     FROM book_details
 )
 SELECT book_title, book_description, match_score
-FROM cte
+FROM book_cte
 WHERE match_score IS NOT NULL
 ORDER BY match_score DESC
 LIMIT 10;
