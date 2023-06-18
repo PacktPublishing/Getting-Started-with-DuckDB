@@ -11,18 +11,22 @@ loaded,
 install_path
 FROM duckdb_extensions();
 
-INSTALL json;
-LOAD json;
+INSTALL sqlite_scanner;
+LOAD sqlite_scanner;
 
 SELECT extension_name,
 installed,
 loaded
 FROM duckdb_extensions()
-WHERE extension_name = 'json';
+WHERE extension_name = 'sqlite_scanner';
 
+ATTACH 'my_sqlite.db' (TYPE sqlite);
+
+SHOW ALL TABLES;
 
 SELECT * 
-FROM read_json('./countries.json', auto_detect=true, format='auto');
+FROM my_sqlite.countries_sqlite;
+
 
 -- Reading remote files with the httpfs extension
 INSTALL httpfs;
