@@ -1,8 +1,7 @@
 duckdb
-notebook
-jupysql
 duckdb-engine
-pandas       
+jupysql
+jupyterlab
 matplotlib
+pandas
 seaborn
-
