@@ -3,24 +3,24 @@
 ## DuckDB Extensions
 
 ```sql
-
-SELECT *
+SELECT * 
 FROM duckdb_extensions();
 
 INSTALL sqlite_scanner;
 LOAD sqlite_scanner;
 
-SELECT extension_name,
-installed,
-loaded
-FROM duckdb_extensions()
+SELECT 
+    extension_name,
+    installed,
+    loaded
+    FROM duckdb_extensions()
 WHERE extension_name = 'sqlite_scanner';
 
 ATTACH 'my_sqlite.db' (TYPE sqlite);
 
 SHOW ALL TABLES;
 
-SELECT * 
+SELECT *
 FROM my_sqlite.countries_sqlite;
 
 
@@ -29,10 +29,12 @@ INSTALL httpfs;
 LOAD httpfs;
 
 SELECT *
-FROM read_csv('https://www2.census.gov/programs-surveys/popest/datasets/2020-2022/cities/totals/sub-est2022.csv', AUTO_DETECT=TRUE);
+FROM read_csv(
+        'https://www2.census.gov/programs-surveys/popest/datasets/2020-2022/cities/totals/sub-est2022.csv',
+        auto_detect=TRUE
+    );
 
-SELECT * 
-FROM duckdb_settings()
+SELECT * FROM duckdb_settings()
 WHERE name like 's3%';
 
 SET s3_region='us-east-1';
@@ -47,12 +49,11 @@ PRAGMA temp_directory='./tmp.tmp';
 
 CREATE OR REPLACE SEQUENCE book_details_seq;
 
-CREATE OR REPLACE TABLE book_details
-AS
-SELECT nextval('book_details_seq') as book_details_id,
-"Title" as book_title, 
-description as book_description
-FROM read_csv('../chapter_04/books_data.csv',  AUTO_DETECT=TRUE);
+CREATE OR REPLACE TABLE book_details AS
+SELECT nextval('book_details_seq') AS book_details_id,
+    "Title" as book_title, 
+    description as book_description
+FROM read_csv('../chapter_04/books_data.csv',  auto_detect=TRUE);
 
 SUMMARIZE book_details;
 
@@ -60,11 +61,20 @@ SUMMARIZE book_details;
 INSTALL fts; 
 LOAD fts;
 
-PRAGMA create_fts_index('book_details', 'book_details_id', 'book_title', 'book_description', overwrite='TRUE');
+PRAGMA create_fts_index(
+         'book_details',
+         'book_details_id',
+         'book_title',
+         'book_description',
+         overwrite=1
+    );
 
-WITH book_cte AS
-(
-    SELECT *, fts_main_book_details.match_bm25(book_details_id, 'travel france wine') AS match_score
+WITH book_cte AS (
+    SELECT *, 
+        fts_main_book_details.match_bm25(
+            book_details_id, 
+            'travel france wine'
+        ) AS match_score
     FROM book_details
 )
 SELECT book_title, book_description, match_score
@@ -82,43 +92,42 @@ LOAD spatial;
 
 SELECT st_point(48.858935, 2.293412) AS Eiffel_Tower;
 
-SELECT  
-st_point(48.858935, 2.293412) AS Eiffel_Tower, 
-st_point(48.873407, 2.295471) AS Arc_de_Triomphe,
-st_distance(
-  st_transform(Eiffel_Tower, 'EPSG:4326', 'EPSG:27563'), 
-  st_transform(Arc_de_Triomphe, 'EPSG:4326', 'EPSG:27563')
-) as Aerial_Distance_M;
+SELECT
+    st_point(48.858935, 2.293412) AS Eiffel_Tower, 
+    st_point(48.873407, 2.295471) AS Arc_de_Triomphe,
+    st_distance(
+        st_transform(Eiffel_Tower, 'EPSG:4326', 'EPSG:27563'), 
+        st_transform(Arc_de_Triomphe, 'EPSG:4326', 'EPSG:27563')
+    ) as Aerial_Distance_M;
 
 
-SELECT * 
+SELECT *
 FROM st_read('stations.xlsx', layer='stations');
 
 -- reading Excel XLSX files
 CREATE OR REPLACE TABLE stations AS
-SELECT * 
+SELECT *
 FROM st_read('stations.xlsx', layer='stations');
 
-SELECT wkb_geometry
-FROM st_read('./bordeaux_wine_region.geojson');
+SELECT wkb_geometry FROM st_read('./bordeaux_wine_region.geojson');
 
 SELECT station_name
 FROM stations
-WHERE st_within(st_point(longitude, latitude), 
-(
-  SELECT  st_geomfromwkb(wkb_geometry) 
-  FROM st_read('./bordeaux_wine_region.geojson'))
+WHERE st_within(
+    st_point(longitude, latitude), 
+    (
+        SELECT  st_geomfromwkb(wkb_geometry)
+        FROM st_read('./bordeaux_wine_region.geojson')
+    )
 );
-
 ```
 
 ## Recursive queries and macros
 
 ```sql
-
 CREATE OR REPLACE TABLE wines AS
 SELECT *
-from read_csv('wines.csv', AUTO_DETECT=TRUE);
+FROM read_csv('wines.csv', auto_detect=TRUE);
 
 SELECT *
 FROM wines
@@ -142,19 +151,17 @@ WHERE start_with = 'Rothschild';
 -- macros
 CREATE OR REPLACE TABLE wine_prices AS
 SELECT *
-FROM read_csv('wine_prices.csv', AUTO_DETECT=TRUE);
+FROM read_csv('wine_prices.csv', auto_detect=TRUE);
 
 SELECT wine_name, price, capacity_ml
 FROM wine_prices;
 
-CREATE OR REPLACE MACRO unit_price(price, capacity) 
-AS 
-round(price/capacity, 3);
+CREATE OR REPLACE MACRO unit_price(price, capacity) AS round(price/capacity, 3);
 
 SELECT wine_name, 
-price, 
-capacity_ml, 
-unit_price(price, capacity_ml) as price_ml
+    price,
+    capacity_ml,
+    unit_price(price, capacity_ml) AS price_ml
 FROM wine_prices;
 
 ```
