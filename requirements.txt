@@ -1,7 +1,9 @@
+black
 duckdb
 duckdb-engine
 jupysql
 jupyterlab
+jupyterlab_code_formatter
 matplotlib
 pandas
 seaborn
