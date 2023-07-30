@@ -1,9 +1,10 @@
-black
+arrow
 duckdb
 duckdb-engine
+emoji
 jupysql
 jupyterlab
-jupyterlab_code_formatter
 matplotlib
 pandas
+polars
 seaborn
