@@ -34,7 +34,8 @@ FROM read_csv(
         auto_detect=TRUE
     );
 
-SELECT * FROM duckdb_settings()
+SELECT *
+FROM duckdb_settings()
 WHERE name like 's3%';
 
 SET s3_region='us-east-1';
@@ -98,7 +99,7 @@ SELECT
     st_distance(
         st_transform(Eiffel_Tower, 'EPSG:4326', 'EPSG:27563'), 
         st_transform(Arc_de_Triomphe, 'EPSG:4326', 'EPSG:27563')
-    ) as Aerial_Distance_M;
+    ) AS Aerial_Distance_M;
 
 
 SELECT *
@@ -139,7 +140,9 @@ WITH RECURSIVE wine_hierarchy(wine_id, start_with, wine_path) AS
   FROM wines
   WHERE sub_class_of IS NULL
   UNION ALL
-  SELECT wines.wine_id, wines.wine_name, list_prepend(wines.wine_name, wine_hierarchy.wine_path)
+  SELECT wines.wine_id,
+      wines.wine_name,
+      list_prepend(wines.wine_name, wine_hierarchy.wine_path)
   FROM wines, wine_hierarchy
   WHERE wines.sub_class_of = wine_hierarchy.wine_id
 )
