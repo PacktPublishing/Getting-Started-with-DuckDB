@@ -1,4 +1,4 @@
-# Chapter 6: Installing and connecting to DuckDB in Python
+# Chapter 7: Installing and connecting to DuckDB in Python
 
 ## Connecting to DuckDB in Python
 
