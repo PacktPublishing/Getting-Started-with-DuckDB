@@ -2,7 +2,6 @@
 *.ipynb
 *.csv
 *.parquet
-*.json
 *.duckdb
 *.db
 *.zip

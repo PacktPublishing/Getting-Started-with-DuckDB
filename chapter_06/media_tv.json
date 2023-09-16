@@ -1,0 +1,2 @@
+{"media_type":"tv","name":"The Simpsons","media_payload":{"type":"Animation","genres":["Comedy","Family"],"premiered":"1989-12-16","schedule":{"time":"19:00","days":["Sunday"]}}}
+{"media_type":"tv","name":"Bluey","media_payload":{"type":"Animation","genres":["Kids"],"premiered":"2018-10-04","schedule":{"time":"","days":[]}}}
