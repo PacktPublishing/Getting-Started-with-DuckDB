@@ -1,3 +1,5 @@
-{"media_type":"film","name":"James Bond","media_payload":{"first_screened":"2022-10-05","genres":["Action"]}}
+{"media_type":"film","name":"James Bond - No Time to Die","media_payload":{"first_film_screened":"2022-10-05", "staring":["Daniel Craig", "Ana de Armas"]}}
+{"media_type":"film","name":"Barbie","media_payload":{"first_film_screened":"2023-02-05", "staring":["Margot Robbie", "Ryan Gosling"]}}
 {"media_type":"tv","name":"The Simpsons","media_payload":{"type":"Animation","genres":["Comedy","Family"],"premiered":"1989-12-16","schedule":{"time":"19:00","days":["Sunday"]}}}
-{"media_type":"tv","name":"Bluey","media_payload":{"type":"Animation","genres":["Kids"],"premiered":"2018-10-04","schedule":{"time":"","days":[]}}}
+{"media_type":"tv","name":"Bluey","media_payload":{"type":"Animation","genres":["Kids"],"premiered":"2018-10-04","schedule":{"time":"08:00","days":["Saturday","Sunday"]}}}
+{"media_type":"tv","name":"Friends","media_payload":{"type":"Scripted","genres":["Comedy","Romance"],"premiered":"1994-09-20","schedule":{"time":"20:00","days":["Thursday"]}}}

@@ -1,2 +1,3 @@
 {"media_type":"tv","name":"The Simpsons","media_payload":{"type":"Animation","genres":["Comedy","Family"],"premiered":"1989-12-16","schedule":{"time":"19:00","days":["Sunday"]}}}
-{"media_type":"tv","name":"Bluey","media_payload":{"type":"Animation","genres":["Kids"],"premiered":"2018-10-04","schedule":{"time":"","days":[]}}}
+{"media_type":"tv","name":"Bluey","media_payload":{"type":"Animation","genres":["Kids"],"premiered":"2018-10-04","schedule":{"time":"08:00","days":["Saturday","Sunday"]}}}
+{"media_type":"tv","name":"Friends","media_payload":{"type":"Scripted","genres":["Comedy","Romance"],"premiered":"1994-09-20","schedule":{"time":"20:00","days":["Thursday"]}}}
