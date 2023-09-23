@@ -2,6 +2,13 @@
 # Chapter 06 - Semi-structured data manipulation
 
 
+## Technical requirements
+
+```sql
+INSTALL 'json';
+LOAD 'json';
+```
+
 ## Data Types
 
 
@@ -66,12 +73,6 @@ GROUP BY film_name;
 
 
 
-## Technical requirements
-
-```sql
-INSTALL 'json';
-LOAD 'json';
-```
 
 ## JSON import 
 
@@ -118,6 +119,40 @@ media_payload.*
 FROM media;
 ```
 
+## JSON extraction within a query
+
+
+```sql
+
+SELECT *
+FROM media;
+
+-- Extract VARCHAR from json with json_extract_string function
+SELECT name, 
+json_extract_string(media_payload, '$.genres[0]'), 
+json_extract_string(media_payload, '$.premiered'),
+json_extract_string(media_payload, '$.schedule')
+FROM media;
+
+-- For the extraction of multiple values from a JSON payload, use a list of paths
+WITH extracted_cte AS
+(
+  SELECT  json_extract_string(media_payload, [ '$.genres[0]', '$.premiered', '$.schedule' ]) as json_list
+  FROM media
+)
+SELECT json_list[1], json_list[2], json_list[3]
+FROM extracted_cte ;
+
+
+
+-- Extract JSON from json with json_extract function            
+SELECT name, 
+json_extract(media_payload, '$.genres[0]'), 
+json_extract(media_payload, '$.premiered'),
+json_extract(media_payload, '$.schedule')
+FROM media;
+
+```
 
 
 
@@ -138,71 +173,13 @@ SELECT *
 FROM media_extracted;
 
 SELECT name, 
-genres,
-json_array_length(genres) as genres_array_length
-FROM media_extracted;
-
--- Beware the cardinality
-SELECT name, 
 unnest(genres)
 FROM media_extracted;
 
-
-
 ```
 
-## JSON extraction within a query
 
 
--- TODO - store "media_payload" as a JSON string, and emp this is parse at query time rather than load
-
-```sql
--- extracts as  varchar    │    varchar[]     │    date    │ struct("time" varchar, "days" varchar[]) 
-SELECT name, 
-media_payload.genres[1], 
-media_payload.premiered,
-media_payload.schedule
-FROM read_json('./media_tv.json', auto_detect=true, records='true', format='newline_delimited') ;
-
--- extracts as varchar    │           json            │             json             │                json
-SELECT name, 
-media_payload->'genres'->0, 
-media_payload->'premiered',
-media_payload->'schedule'
-FROM read_json('./media_tv.json', auto_detect=true, records='true', format='newline_delimited') ;
-
--- extracts as  varchar    │                  json                   │                    json                    │                   json             
-SELECT name, 
-json_extract(media_payload, '$.genres[0]'), 
-json_extract(media_payload, '$.premiered'),
-json_extract(media_payload, '$.schedule')
-FROM read_json('./media_tv.json', auto_detect=true, records='true', format='newline_delimited') ;
-
-
--- extracts as varchar    │           varchar            │             varchar             │              varchar  
-SELECT name, 
-media_payload->>'genres'->0, 
-media_payload->>'premiered',
-media_payload->>'schedule'
-FROM read_json('./media_tv.json', auto_detect=true, records='true', format='newline_delimited') ;
-
--- extracts as varchar    │                    varchar                     │                      varchar                      │                     varchar       
-SELECT name, 
-json_extract_string(media_payload, '$.genres[0]'), 
-json_extract_string(media_payload, '$.premiered'),
-json_extract_string(media_payload, '$.schedule')
-FROM read_json('./media_tv.json', auto_detect=true, records='true', format='newline_delimited') ;
-
--- For the extraction of multiple values from a JSON payload, use a list of paths
-WITH extracted_cte AS
-(
-  SELECT  json_extract(media_payload, [ '$.genres[0]', '$.premiered', '$.schedule' ]) as json_list
-  FROM read_json('./media_tv.json', auto_detect=true, records='true', format='newline_delimited') 
-)
-SELECT json_list[1], json_list[2], json_list[3]
-FROM extracted_cte ;
-
-```
 
 
 ## Working with inconsistent JSON schemas
@@ -212,8 +189,6 @@ SELECT media_type, json_group_structure(media_payload)
 FROM read_json('./media_mixed.json', auto_detect=true, records='true', format='newline_delimited') 
 group by media_type;
 
--- TODO - add example of extracting films
-
 SELECT media_payload.*
 FROM read_json('./media_mixed.json', auto_detect=true, records='true', format='newline_delimited') 
 WHERE media_type = 'tv';
@@ -222,6 +197,17 @@ SELECT media_payload.*
 FROM read_json('./media_mixed.json', auto_detect=true, records='true', format='newline_delimited') 
 WHERE media_type = 'film';
 
+SELECT media_type, name, media_payload.*
+FROM read_json('./media_mixed.json',
+columns = { 
+  "media_type": VARCHAR, 
+  "name": VARCHAR, 
+  "media_payload": 'STRUCT(
+    "first_film_screened" DATE, 
+    "staring" VARCHAR[]
+  )'
+}, records='auto', format='newline_delimited')
+WHERE media_type = 'film';
 
 SELECT media_type, name, media_payload.*
 FROM read_json('./media_mixed.json',
@@ -239,19 +225,6 @@ columns = {
   )'
 }, records='auto', format='newline_delimited')
 WHERE media_type = 'tv';
-
-SELECT media_type, name, media_payload.*
-FROM read_json('./media_mixed.json',
-columns = { 
-  "media_type": VARCHAR, 
-  "name": VARCHAR, 
-  "media_payload": 'STRUCT(
-    "first_film_screened" DATE, 
-    "staring" VARCHAR[]
-  )'
-}, records='auto', format='newline_delimited')
-WHERE media_type = 'film';
-
 ```
 
 
@@ -262,20 +235,20 @@ WHERE media_type = 'film';
 
 ```sql
 
+INSTALL httpfs;
+LOAD httpfs;
+
 select *
-from read_json('https://api.tvmaze.com/singlesearch/shows?q=The%20Simpsons', auto_detect=true, format='newline_delimited');
+from read_json('https://api.tvmaze.com/singlesearch/shows?q=The%20Simpsons', 
+auto_detect=true, format='newline_delimited');
 
 -- Now we know The Simpsons is coded as show number 83
-select *
-from read_json('https://api.tvmaze.com/shows/83/seasons', auto_detect=true);
 
--- Se can look at the episode list of season 34 of "The Simpsons"
-select season, number, name, rating, summary
-from read_json('https://api.tvmaze.com/seasons/124283/episodes', auto_detect=true);
-
-select season, number, name, rating, summary, airstamp
-from read_json('https://api.tvmaze.com/shows/83/episodebynumber?season=34&number=1', auto_detect=true, format='newline_delimited');
+select season, 
+number, 
+name, 
+json_extract_string(rating, '$.average') as avg_rating, 
+summary
+from read_json('https://api.tvmaze.com/shows/83/episodebynumber?season=34&number=2', auto_detect=true, format='newline_delimited');
 
 ```
-
-## Summary
