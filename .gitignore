@@ -1,31 +1,13 @@
 # files and data
 *.ipynb
+*.Rmd
 *.csv
 *.parquet
 *.duckdb
 *.db
 *.zip
-
-.DS_Store
-*/tmp.tmp/*
 *.wal
-*/archive/*
-*/draft_text.txt
-*/ADHOC_NOTES.md
-chapter_02/archive/*
-chapter_03/archive/*
-chapter_02/bike_rides/*
-chapter_02/export_directory/*
-chapter_04/book_reviews_hive/*
-chapter_04/profile*.log
-chapter_04/movies/*
-chapter_04/wine/*
-chapter_04/amazon*
-chapter_04/insertions*
-chapter_04/archive.zip
-chapter_04/archive_OLD/*
-chapter_03/archive_OLD/*
-chapter_05/wine_diagram.md
+.DS_Store
 
 # pyenv
 .python-version
