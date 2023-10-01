@@ -1,0 +1,370 @@
+---
+title: Using the DuckDB R API
+author: Ned Letcher
+output: html_document
+---
+
+# Using the DuckDB R API
+
+## Technical requirements 
+
+In order to run the examples in this notebook, you'll need to install the R dependencies for this project. You can do this by running the following command in your R session. 
+
+    install.packages(c("duckdb", "tidyverse")) 
+
+For complete instructions on how to set up your environment for working through the examples, please consult the *Technical requirements* section of this chapter in the book.
+
+## Working with DuckDB using R’s DBI 
+
+```{r}
+library("DBI")
+```
+
+### Connecting to DuckDB
+
+```{r}
+disk_conn <- dbConnect(duckdb::duckdb(), dbdir = "quack.duckdb")
+```
+
+```{r}
+read_only_conn <- dbConnect(duckdb::duckdb(), dbdir = "quack.duckdb", read_only = TRUE)
+```
+
+```{r}
+mem_conn <- dbConnect(duckdb::duckdb(), dbdir = ":memory:")
+```
+
+### Reading and writing tables
+
+```{r}
+library(tidyverse) 
+
+dogs_df <- read_delim(
+    file = "NYC_Dog_Licensing_Dataset.csv",
+    delim = ";",
+    col_types = cols(
+        LicenseIssuedDate = col_date("%m/%d/%Y"),
+        LicenseExpiredDate = col_date("%m/%d/%Y"),
+        AnimalGender = col_factor(levels = c("M", "F")),
+    ),
+)
+
+head(dogs_df, 5)
+```
+
+```{r}
+conn <- dbConnect(duckdb::duckdb(), dbdir = "nyc_dogs.duckdb")
+
+dbWriteTable(conn, "dogs_from_df", dogs_df)
+```
+
+```{r}
+dbListTables(conn)
+```
+
+```{r}
+dbListFields(conn, "dogs_from_df")
+```
+
+```{r}
+dogs_from_duckdb_df <- dbReadTable(conn, "dogs_from_df")
+
+tail(dogs_from_duckdb_df, 5)
+```
+
+```{r}
+dbCreateTable(conn, "dogs", dogs_df) 
+
+dbReadTable(conn, "dogs") 
+```
+
+```{r}
+dbCreateTable( 
+    conn,
+    "good_dogs",
+    c(name = "character", birthday = "date", age = "double")
+) 
+
+dbListTables(conn)
+```
+
+```{r}
+dbDataType(conn, "Monty")
+
+dbDataType(conn, 6)
+
+dbDataType(conn, today())
+```
+
+```{r}
+dbRemoveTable(conn, "good_dogs") 
+
+dbListTables(conn)
+```
+
+### Querying and executing SQL statements
+
+```{r}
+dbGetQuery(
+    conn,
+    "
+    SELECT
+        ZipCode,
+        count(*) AS num_registrations
+    FROM dogs_from_df
+    GROUP BY ZipCode
+    ORDER BY num_registrations DESC
+    LIMIT 10
+    "
+)
+```
+
+```{r}
+dbExecute(
+    conn,
+    " 
+    CREATE OR REPLACE VIEW nyc_dogs_csv AS
+    SELECT *
+    FROM 'NYC_Dog_Licensing_Dataset.csv'
+    "
+)
+```
+
+```{r}
+dbGetQuery(
+    conn,
+    " 
+    SELECT *
+    FROM nyc_dogs_csv
+    USING SAMPLE 3
+    "
+)
+```
+
+```{r}
+dbExecute(
+    conn,
+    " 
+    CREATE OR REPLACE TABLE nyc_dogs AS
+    SELECT *
+    FROM nyc_dogs_csv
+    "
+)
+
+dbListTables(conn)
+```
+
+```{r}
+dogs_df1 = dbGetQuery(conn, "SELECT * FROM nyc_dogs")
+
+dogs_df2 = dbReadTable(conn, "nyc_dogs")
+```
+
+### Using Prepared statements  
+
+```{r}
+dbGetQuery(
+    conn,
+    "
+    SELECT *
+    FROM nyc_dogs
+    WHERE BreedName = ? AND AnimalGender = ?
+    LIMIT ?
+    ",
+    list("Beagle", "M", 3)
+)
+```
+
+```{r}
+result <- dbSendStatement(conn, "INSERT INTO nyc_dogs VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+
+dbBind(result, list("John", "M", 2013, "Jack Russell Terrier", 10261, "2014-07-12", "2017-08-09", 2016))
+
+dbBind(result, list("Lady Fluffina", "F", 2014, "Bichon Frisé", 10302, "2014-08-22", "2017-09-25", 2016))
+
+dbClearResult(result)
+```
+
+```{r}
+tail(dbReadTable(conn, "nyc_dogs"), 2)
+```
+
+### Disconnecting from DuckDB  
+
+```{r}
+dbDisconnect(conn, shutdown = TRUE)
+```
+
+```{r}
+run_query <- function(db_path, sql_query) {
+    conn <- dbConnect(duckdb::duckdb(), dbdir = db_path)
+    on.exit(dbDisconnect(conn, shutdown = TRUE), add = TRUE)
+    dbGetQuery(conn, sql_query)
+}
+```
+
+```{r}
+run_query("nyc_dogs.duckdb", "SELECT * FROM nyc_dogs USING SAMPLE 3")
+```
+
+## Registering R objects as virtual tables 
+
+### Registering a dataframe as a virtual table
+
+```{r}
+conn <- dbConnect(duckdb::duckdb(), dbdir = "nyc_dogs.duckdb")
+
+duckdb::duckdb_register(conn, "dogs_df_view", dogs_df)
+
+dbListTables(conn)
+```
+
+```{r}
+dbGetQuery(conn, "SELECT * FROM dogs_df_view USING SAMPLE 3")
+```
+
+```{r}
+duckdb::duckdb_unregister(conn, "dogs_df_view")
+
+dbListTables(conn)
+```
+
+### Registering an Arrow table as a virtual table
+
+```{r}
+library(arrow) 
+
+dogs_arrow = arrow::arrow_table(dogs_df)
+```
+
+```{r}
+duckdb::duckdb_register_arrow(conn, "dogs_arrow_view", dogs_arrow)
+```
+
+```{r}
+dbGetQuery(conn, "SELECT * FROM dogs_arrow_view USING SAMPLE 3")
+```
+
+```{r}
+duckdb::duckdb_list_arrow(conn)
+```
+
+```{r}
+duckdb::duckdb_unregister_arrow(conn, "dogs_arrow_view")
+```
+
+## Using DuckDB with `dplyr`
+
+### Using `dplyr` to query dataframes
+
+```{r}
+dbReadTable(conn, "nyc_dogs_csv") |>
+    group_by(year=year(LicenseIssuedDate)) |>
+    summarise(count = n()) |>
+    arrange(desc(count))
+```
+
+```{r}
+dbReadTable(conn, "nyc_dogs_csv") |>
+    count(year=year(LicenseIssuedDate), name = "count", sort = TRUE)
+```
+
+### Using `dplyr` to query DuckDB tables via `dbplyr`
+
+```{r}
+tbl(conn, "nyc_dogs_csv")
+```
+
+```{r}
+tbl(conn, "nyc_dogs_csv") |>
+    head(3) |> 
+    collect()
+```
+
+```{r}
+tbl(conn, "nyc_dogs_csv") |>
+    head(3) |>
+    show_query()
+```
+
+### Data wrangling with `dplyr`
+
+```{r}
+unique_dogs <- tbl(conn, "nyc_dogs_csv") |>
+    filter(!AnimalName %in% c("UNKNOWN", "NAME NOT PROVIDED", "NAME", "NONE")) |>
+    filter(!BreedName %in% c("Unknown", "Not Provided")) |>
+    distinct(AnimalName, AnimalGender, AnimalBirthYear, BreedName, ZipCode)
+```
+
+```{r}
+unique_dogs |>
+    head(5) |>
+    collect()
+```
+
+```{r}
+table_query <- unique_dogs |>
+    filter(AnimalGender == "M") |>
+    count(AnimalName, name = "num_dogs", sort = TRUE) |>
+    head(10)
+```
+
+```{r}
+table_query |>
+    show_query()
+```
+
+```{r}
+table_query |>
+    collect()
+```
+
+```{r}
+pop_dog_names <- unique_dogs |>
+    filter(AnimalGender == "F", AnimalBirthYear > 2010) |>
+    count(AnimalBirthYear, AnimalName, name = "NumDogs") |>
+    slice_max(by = AnimalBirthYear, order_by = NumDogs) |>
+    arrange(AnimalBirthYear)
+```
+
+```{r}
+pop_dog_names |>
+    collect()
+```
+
+```{r}
+issued_by_year = tbl(conn, "nyc_dogs_csv") |>
+    count(
+        LicenseIssuedYear=year(LicenseIssuedDate),
+        name = "Count",
+        sort = TRUE
+    )
+
+issued_by_year |>
+    collect()
+```
+
+```{r}
+issued_by_year |> 
+    show_query()
+```
+
+```{r}
+unique_dogs |>
+    mutate(Hash=md5(concat(AnimalName, ZipCode))) |>
+    head(3) |>
+    collect()
+```
+
+```{r}
+unique_dogs |>
+    count(AnimalName, name = "Count") |>
+    filter(Count >= 100) |>
+    mutate(EditDistance=round(jaro_winkler_similarity(AnimalName, "BELLA"), 3)) |>
+    arrange(desc(EditDistance)) |>
+    head(10) |>
+    collect()
+```
+
+## Summary
+
