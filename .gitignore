@@ -1,8 +1,6 @@
 # files and data
 *.ipynb
 *.Rmd
-*.csv
-*.parquet
 *.duckdb
 *.db
 *.zip
