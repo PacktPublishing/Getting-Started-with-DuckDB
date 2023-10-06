@@ -1,10 +1,11 @@
 arrow
+dash
 duckdb
-duckdb-engine
 emoji
 jupysql
 jupyterlab
-matplotlib
 pandas
 polars
-seaborn
+plotly
+sqlparse
+
