@@ -1,6 +1,10 @@
 
 # Chapter 06 - Semi-structured data manipulation
 
+## Licensing
+- The [Query JSON from an API](#query-json-from-an-api) section makes use of the [TVmaze API](https://www.tvmaze.com/api) which is licensed by [CC BY-SA](http://creativecommons.org/licenses/by-sa/4.0/). 
+- All other data sets used in this chapter were created by the author
+
 
 ## Technical requirements
 
