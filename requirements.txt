@@ -1,5 +1,4 @@
 arrow
-dash
 duckdb
 emoji
 jupysql
@@ -8,4 +7,3 @@ pandas
 polars
 plotly
 sqlparse
-
