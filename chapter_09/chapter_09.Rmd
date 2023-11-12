@@ -4,15 +4,19 @@ author: Ned Letcher
 output: html_document
 ---
 
-# Using the DuckDB R API
+# Exploring DuckDB's R API
 
 ## Technical requirements 
 
-In order to run the examples in this notebook, you'll need to install the R dependencies for this project. You can do this by running the following command in your R session. 
+In order to run the examples in this notebook, you'll need to install the R
+dependencies for this project. You can do this by running the following command
+in your R session.
 
-    install.packages(c("duckdb", "tidyverse")) 
+    install.packages(c("duckdb", "tidyverse", "arrow")) 
 
-For complete instructions on how to set up your environment for working through the examples, please consult the *Technical requirements* section of this chapter in the book.
+For complete instructions on how to set up your environment for working through
+the examples, please consult the *Technical requirements* section of this
+chapter in the book.
 
 ## Working with DuckDB using R’s DBI 
 
