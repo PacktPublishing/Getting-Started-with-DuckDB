@@ -7,13 +7,15 @@ CREATE OR REPLACE TABLE web_log_text
 (raw_text VARCHAR);
 
 COPY web_log_text 
-FROM './access.log' (DELIMITER '\n');
+FROM './access.log' (DELIMITER '');
 
-SELECT *
-FROM web_log_text;
+SELECT *  
+FROM web_log_text 
+LIMIT 10; 
 
 SELECT regexp_extract(raw_text, '^[0-9\.]*' ) as client_ip 
-FROM  web_log_text;
+FROM  web_log_text
+LIMIT 3;
 
 SELECT regexp_extract(raw_text, '^[0-9\.]*' ) as client_ip, 
 regexp_extract(raw_text, '\[(.*)\]',1 ) as date_text,
@@ -65,7 +67,7 @@ CREATE OR REPLACE TABLE language_iso(
 
 INSERT INTO language_iso
 SELECT *
-FROM read_csv('./language_iso.csv', AUTO_DETECT=TRUE, header=True);
+FROM read_csv('./language_iso.csv', auto_detect=true, header=true);
 
 SELECT wls.http_date,
 wls.http_lang,

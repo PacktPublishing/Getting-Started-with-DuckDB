@@ -1,7 +1,7 @@
 CREATE OR REPLACE TABLE web_log_text (raw_text VARCHAR);
 
 COPY web_log_text 
-FROM './access.log' (delimiter '\n');
+FROM './access.log' (delimiter '');
 
 CREATE OR REPLACE TABLE web_log_split
 AS
