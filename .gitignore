@@ -171,3 +171,11 @@ cython_debug/
 *.Rproj*
 .RData
 .Rhistory
+
+STYLE.md
+
+chapter_02/archive/*
+chapter_02/export_directory/*
+chapter_02/bike_rides/*
+chapter_02/bike_rides_april.csv
+chapter_02/bike_rides_april.json

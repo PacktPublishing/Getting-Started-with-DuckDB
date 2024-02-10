@@ -13,8 +13,8 @@ CREATE OR REPLACE TABLE foods (
 
 COPY foods FROM 'foods_no_heading.csv';
 
-select * 
-from foods;
+SELECT * 
+FROM foods;
 ```
 
 ## COPY file options during load
@@ -30,7 +30,7 @@ FROM 'foods_with_heading.tsv' (DELIMITER '\t', HEADER);
 ```sql
 COPY foods FROM 'foods_error.csv';
 
-COPY foods FROM 'foods_error.csv' (ignore_errors true);
+COPY foods FROM 'foods_error.csv' (IGNORE_ERRORS true);
 ```
 
 
@@ -38,10 +38,10 @@ COPY foods FROM 'foods_error.csv' (ignore_errors true);
 
 ```sql
 SELECT * 
-FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE);
+FROM read_csv('food_prices.csv', auto_detect=true);
 
 DESCRIBE SELECT * 
-FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE);
+FROM read_csv('food_prices.csv', auto_detect=true);
 ```
 
 ## Table creation with read_csv
@@ -50,7 +50,7 @@ FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE);
 CREATE OR REPLACE TABLE low_cost_foods 
 as 
 SELECT * 
-FROM read_csv('food_prices.csv', AUTO_DETECT=TRUE) 
+FROM read_csv('food_prices.csv', auto_detect=true) 
 WHERE price < 4.00;
 
 SELECT * 
@@ -61,10 +61,7 @@ FROM low_cost_foods;
 
 ```sql
 SELECT * 
-FROM read_csv('food_orders.csv', AUTO_DETECT=TRUE);
-
-SELECT * 
-FROM read_csv('food_orders.csv', AUTO_DETECT=TRUE, dateformat='%Y%m%d');
+FROM read_csv('food_orders.csv', auto_detect=true);
 
 SELECT * 
 FROM read_csv('food_orders.csv'
@@ -81,20 +78,20 @@ FROM read_csv('food_orders.csv'
 ```sql
 SELECT food_name, color, filename   
 FROM read_csv('food_collection/pizza*.csv', 
-AUTO_DETECT=TRUE, 
-FILENAME=TRUE);
+auto_detect=true, 
+filename=true);
 ```
 
 ## Mixed schemas
 
 ```sql
 SELECT *  
-FROM read_csv('food_collection/*.csv', AUTO_DETECT=TRUE);
+FROM read_csv('food_collection/*.csv', auto_detect=true);
 
 SELECT *  
 FROM read_csv('food_collection/*.csv', 
-UNION_BY_NAME=TRUE, 
-AUTO_DETECT=TRUE);
+union_by_name=true, 
+auto_detect=true);
 ```
 
 
@@ -103,13 +100,13 @@ AUTO_DETECT=TRUE);
 ```sql
 SELECT *  
 FROM read_json('pizza_orders_records.json',  
-AUTO_DETECT=true,
-FORMAT='newline_delimited');
+auto_detect=true,
+format='newline_delimited');
 
 SELECT *
 FROM read_json('pizza_orders_array_of_records.json',
-AUTO_DETECT=true,
-FORMAT='array');
+auto_detect=true,
+format='array');
 ```
 
 # Parquet
@@ -138,20 +135,20 @@ FROM read_parquet('food_orders.parquet');
 ```sql
 .mode line
 
-select *
-from read_csv(
+SELECT *
+FROM read_csv(
 'archive/74id-aqj9.csv',
 auto_detect=true)
-limit 1;
+LIMIT 1;
 
 .mode duckbox
 
 CREATE OR REPLACE TABLE bikes
-as
+AS
 SELECT * 
 from read_csv(
   'archive/74id-aqj9.csv', 
-  header=True, 
+  header=true, 
   dateformat='%Y%m%d%H%M%S',
   columns={
     'id': 'INT', 
