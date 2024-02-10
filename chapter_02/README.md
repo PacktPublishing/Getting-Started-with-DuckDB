@@ -152,21 +152,21 @@ from read_csv(
   dateformat='%Y%m%d%H%M%S',
   columns={
     'id': 'INT', 
-    '_name': 'VARCHAR',
+    'name': 'VARCHAR',
     'terminalname': 'INT',
     'nbbikes': 'INT',
     'nbemptydocks': 'VARCHAR',
     'rundate': 'DATE',
     'installed': 'BOOLEAN',
-    '_temporary': 'BOOLEAN',
-    '_locked': 'BOOLEAN',
+    'temporary': 'BOOLEAN',
+    'locked': 'BOOLEAN',
     'lastcommwithserver': 'LONG',
     'latestupdatetime': 'LONG',
     'removaldate': 'LONG',
     'installdate': 'LONG',
     'lat': 'FLOAT',
     'long': 'FLOAT',
-    '_location': 'VARCHAR'
+    'location': 'VARCHAR'
   }
 ) ;
 
