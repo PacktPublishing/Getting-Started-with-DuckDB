@@ -34,12 +34,13 @@ FROM read_csv(
 auto_detect=TRUE
 );
 
-SELECT *
-FROM duckdb_settings()
-WHERE name like 's3%';
 
-SET s3_region='us-east-1';
-SET s3_endpoint='s3.amazonaws.com';
+CREATE OR REPLACE SECRET mysecret (
+    TYPE S3,
+    REGION 'us-east-1',
+    ENDPOINT 's3.amazonaws.com'
+);
+
 
 SELECT *
 FROM read_parquet('s3://duckdb-s3-bucket-public/countries.parquet')
