@@ -192,7 +192,7 @@ COPY bike_rides_april
 TO 'bike_rides_april.csv' (HEADER, DELIMITER ',');
 
 
-COPY (select _name, rundate from bike_rides_april)
+COPY (select name, rundate from bike_rides_april)
 TO 'bike_rides_april.json' (FORMAT JSON, dateformat '%d %B %Y');
 
 
