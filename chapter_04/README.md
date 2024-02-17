@@ -15,12 +15,18 @@ cd chapter_04
 unzip archive.zip
 ``` 
 
+### Out of Memory Error
+
+If you receive the error "Error: Out of Memory Error: failed to allocate data of size", allow unused blocks to be offloaded to disk if required
+
+You can ignore this step otherwise
+```sql
+PRAGMA temp_directory='./tmp.tmp';
+```
+
+
 ## DuckDB indexes 
 ```sql
-
--- Allow unused blocks to be offloaded to disk if required
-PRAGMA temp_directory='./tmp.tmp';
-
 CREATE OR REPLACE SEQUENCE book_reviews_seq;
 
 COPY (
@@ -35,7 +41,7 @@ COPY (
     "review/summary" as review_summary, 
     "review/text" as review_text,
     "review/score" as review_score
-    FROM read_csv('./Books_rating.csv',  AUTO_DETECT=TRUE) bk 
+    FROM read_csv('./Books_rating.csv',  AUTO_DETECT=TRUE) 
     CROSS JOIN (SELECT range, case when range=0 then 'JP' else 'US' end as region FROM range (0, 2))
 ) TO 'book_reviews.parquet';
 
@@ -254,8 +260,19 @@ FROM timestamp_demo;
 
 CREATE OR REPLACE TABLE apollo_events
 AS
-SELECT * 
-FROM read_csv('apollo.csv', auto_detect=true, header=true, timestampformat='%d/%b/%Y %H:%M');
+SELECT *
+FROM read_csv(
+  'apollo.csv',
+  header=true, 
+  timestampformat='%d/%b/%Y %H:%M',
+  columns={
+    'event_time': 'TIMESTAMP', 
+    'astronaut': 'VARCHAR',
+    'event_description': 'VARCHAR',
+    'astronaut_location': 'VARCHAR'
+  }
+) ;
+
 
 SELECT *
 FROM apollo_events
