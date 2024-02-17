@@ -172,7 +172,6 @@ cython_debug/
 .RData
 .Rhistory
 
-STYLE.md
 
 chapter_02/archive/*
 chapter_02/export_directory/*
