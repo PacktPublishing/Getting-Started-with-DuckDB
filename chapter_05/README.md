@@ -31,7 +31,7 @@ LOAD httpfs;
 SELECT *
 FROM read_csv(
 'https://www2.census.gov/programs-surveys/popest/datasets/2020-2022/cities/totals/sub-est2022.csv',
-auto_detect=TRUE
+auto_detect=true
 );
 
 
@@ -53,7 +53,7 @@ CREATE OR REPLACE SEQUENCE book_details_seq;
 
 CREATE OR REPLACE TABLE book_details AS
 SELECT nextval('book_details_seq') AS book_details_id,
-    "Title" as book_title, 
+    'Title' as book_title, 
     description as book_description
 FROM read_csv('../chapter_04/books_data.csv',  auto_detect=TRUE);
 
@@ -129,7 +129,7 @@ WHERE st_within(
 ```sql
 CREATE OR REPLACE TABLE wines AS
 SELECT *
-FROM read_csv('wines.csv', auto_detect=TRUE);
+FROM read_csv('wines.csv', auto_detect=true);
 
 SELECT *
 FROM wines
@@ -155,7 +155,7 @@ WHERE start_with = 'Rothschild';
 -- macros
 CREATE OR REPLACE TABLE wine_prices AS
 SELECT *
-FROM read_csv('wine_prices.csv', auto_detect=TRUE);
+FROM read_csv('wine_prices.csv', auto_detect=true);
 
 SELECT wine_name, price, capacity_ml
 FROM wine_prices;
