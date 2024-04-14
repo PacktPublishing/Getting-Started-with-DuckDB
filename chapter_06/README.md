@@ -41,8 +41,8 @@ SELECT {'movie': 'No Time to Die',
 'release_year':2021, 
 box_office:771.2} as struct_movie;
 
--- Struct; nested data types; struct(movie varchar, staring varchar[])
-SELECT {'movie': 'No Time to Die', 'staring': ['Daniel Craig', 'Rami Malek', 'Léa Seydoux']} as struct_nested_movie;
+-- Struct; nested data types; struct(movie varchar, starring varchar[])
+SELECT {'movie': 'No Time to Die', 'starring': ['Daniel Craig', 'Rami Malek', 'Léa Seydoux']} as struct_nested_movie;
 ```
 
 
@@ -58,27 +58,32 @@ FROM read_csv('film_actors.csv', AUTO_DETECT=TRUE, HEADER=TRUE);
 SELECT film_name, actor_name, character_name
 FROM film_actors;
 
-SELECT json_object('film_name', film_name, 
-'actor_name', actor_name) as json_created
+SELECT json_object(
+  'film_name', film_name, 
+  'actor_name', actor_name
+) as json_created
 FROM film_actors;
 
 SELECT film_actors
 FROM film_actors;
 
 
-SELECT film_name, list(actor_name) AS actor_name_list
+SELECT film_name, 
+list(actor_name) AS actor_name_list
 FROM film_actors
 GROUP BY film_name
 ORDER BY film_name;
 
 
-SELECT film_name, list_slice(list(actor_name), 2, 3) as other_actors
+SELECT film_name, 
+list_slice(list(actor_name), 2, 3) as other_actors
 FROM film_actors
 GROUP BY film_name
 ORDER BY film_name;
 
 
-SELECT film_name, json_group_object(actor_name, character_name) as actor_character_list
+SELECT film_name, 
+json_group_object(actor_name, character_name) as actor_character_json
 FROM film_actors 
 GROUP BY film_name;
 ```
@@ -152,7 +157,7 @@ unnest(genres)
 FROM media_extracted;
 
 select name, 
-json_transform(media_payload, '{"genres":["VARCHAR"],"premiered":"VARCHAR","language":"VARCHAR"}')
+json_transform(media_payload, '{"genres":["VARCHAR"],"premiered":"VARCHAR","language":"VARCHAR"}')  AS transformed_json
 from media;
 
 ```
@@ -190,6 +195,9 @@ CROSS JOIN generate_series(1, 50000000);
 ## Working with inconsistent JSON schemas
 ```sql
 
+SELECT media_type, media_payload
+FROM read_json('./media_mixed.json', auto_detect=true, records='true', format='newline_delimited');
+
 SELECT media_type, json_group_structure(media_payload)
 FROM read_json('./media_mixed.json', auto_detect=true, records='true', format='newline_delimited') 
 group by media_type;
@@ -203,14 +211,14 @@ FROM read_json('./media_mixed.json', auto_detect=true, records='true', format='n
 WHERE media_type = 'film';
 
 CREATE OR REPLACE TABLE films AS
-SELECT name, media_payload.staring
+SELECT name, media_payload.starring
 FROM read_json('./media_mixed.json',
 columns = { 
   "media_type": VARCHAR, 
   "name": VARCHAR, 
   "media_payload": 'STRUCT(
     "first_film_screened" DATE, 
-    "staring" VARCHAR[]
+    "starring" VARCHAR[]
   )'
 }, records='auto', format='newline_delimited')
 WHERE media_type = 'film';
@@ -219,7 +227,7 @@ SELECT *
 FROM films;
 
 SELECT name, 
-unnest(staring) as actor_name
+unnest(starring) as actor_name
 FROM films;
 
 SELECT media_type, name, media_payload.*
@@ -229,7 +237,7 @@ columns = {
   "name": VARCHAR, 
   "media_payload": 'STRUCT(
     "first_film_screened" DATE, 
-    "staring" VARCHAR[]
+    "starring" VARCHAR[]
   )'
 }, records='auto', format='newline_delimited')
 WHERE media_type = 'film';
