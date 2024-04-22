@@ -38,19 +38,19 @@ COPY foods FROM 'foods_error.csv' (IGNORE_ERRORS true);
 
 ```sql
 SELECT * 
-FROM read_csv('food_prices.csv', auto_detect=true);
+FROM read_csv('food_prices.csv');
 
 DESCRIBE SELECT * 
-FROM read_csv('food_prices.csv', auto_detect=true);
+FROM read_csv('food_prices.csv');
 ```
 
 ## Table creation with read_csv
 
 ```sql
 CREATE OR REPLACE TABLE low_cost_foods 
-as 
+AS
 SELECT * 
-FROM read_csv('food_prices.csv', auto_detect=true) 
+FROM read_csv('food_prices.csv') 
 WHERE price < 4.00;
 
 SELECT * 
@@ -61,7 +61,7 @@ FROM low_cost_foods;
 
 ```sql
 SELECT * 
-FROM read_csv('food_orders.csv', auto_detect=true);
+FROM read_csv('food_orders.csv');
 
 SELECT * 
 FROM read_csv('food_orders.csv'
@@ -78,7 +78,6 @@ FROM read_csv('food_orders.csv'
 ```sql
 SELECT food_name, color, filename   
 FROM read_csv('food_collection/pizza*.csv', 
-auto_detect=true, 
 filename=true);
 ```
 
@@ -86,12 +85,11 @@ filename=true);
 
 ```sql
 SELECT *  
-FROM read_csv('food_collection/*.csv', auto_detect=true);
+FROM read_csv('food_collection/*.csv');
 
 SELECT *  
 FROM read_csv('food_collection/*.csv', 
-union_by_name=true, 
-auto_detect=true);
+union_by_name=true);
 ```
 
 
@@ -100,12 +98,10 @@ auto_detect=true);
 ```sql
 SELECT *  
 FROM read_json('pizza_orders_records.json',  
-auto_detect=true,
 format='newline_delimited');
 
 SELECT *
 FROM read_json('pizza_orders_array_of_records.json',
-auto_detect=true,
 format='array');
 ```
 
@@ -118,6 +114,7 @@ format='array');
 SELECT * 
 FROM parquet_schema('food_orders.parquet');
 
+
 SELECT *
 FROM read_parquet('food_orders.parquet');
 ```
@@ -128,7 +125,7 @@ FROM read_parquet('food_orders.parquet');
 - Visit  [Melbourne Bike Share Station Readings](https://data.melbourne.vic.gov.au/explore/dataset/melbourne-bike-share-station-readings-2011-2017/information/)
 - Download the compressed CSV file locally to your local machine.
 - Unzip the downloaded file to extract the files from the compressed file and save them on your computer
-- You should have a file called `archive/74id-aqj9.csv` 
+- You should have a file called `74id-aqj9.csv` 
 
 ## Loading the bike station readings
 
@@ -136,39 +133,18 @@ FROM read_parquet('food_orders.parquet');
 .mode line
 
 SELECT *
-FROM read_csv(
-'archive/74id-aqj9.csv',
-auto_detect=true)
+FROM read_csv('74id-aqj9.csv')
 LIMIT 1;
 
 .mode duckbox
 
-CREATE OR REPLACE TABLE bikes
-AS
+CREATE OR REPLACE TABLE bikes AS 
 SELECT * 
-from read_csv(
-  'archive/74id-aqj9.csv', 
-  header=true, 
-  dateformat='%Y%m%d%H%M%S',
-  columns={
-    'id': 'INT', 
-    'name': 'VARCHAR',
-    'terminalname': 'INT',
-    'nbbikes': 'INT',
-    'nbemptydocks': 'VARCHAR',
-    'rundate': 'DATE',
-    'installed': 'BOOLEAN',
-    'temporary': 'BOOLEAN',
-    'locked': 'BOOLEAN',
-    'lastcommwithserver': 'LONG',
-    'latestupdatetime': 'LONG',
-    'removaldate': 'LONG',
-    'installdate': 'LONG',
-    'lat': 'FLOAT',
-    'long': 'FLOAT',
-    'location': 'VARCHAR'
-  }
-) ;
+FROM read_csv( 
+    '74id-aqj9.csv', 
+    timestampformat='%Y%m%d%H%M%S', 
+    types={'rundate': TIMESTAMP} 
+); 
 
 
 SELECT count(*)
