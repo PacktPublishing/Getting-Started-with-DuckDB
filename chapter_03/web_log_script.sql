@@ -26,7 +26,7 @@ SELECT wls.client_ip,
 strptime(wls.http_date_text, '%d/%b/%Y:%H:%M:%S %z') as http_date,
 wls.http_method,
 wls.http_lang,
-ln.language_name 
+lang.language_name 
 FROM web_log_split wls
-LEFT OUTER JOIN language_iso ln on (wls.http_lang = ln.lang_iso);
+LEFT OUTER JOIN language_iso lang on (wls.http_lang = lang.lang_iso);
 
