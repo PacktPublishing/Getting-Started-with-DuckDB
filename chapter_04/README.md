@@ -180,32 +180,32 @@ PRAGMA enable_optimizer;
 PRAGMA enable_profiling;
 PRAGMA profiling_output='profile_with_pushdown.log';
 --
-CREATE OR REPLACE TABLE book_reviews_1969_JP
+CREATE OR REPLACE TABLE book_reviews_1970_JP
 AS
 SELECT region, review_summary, review_text, review_time, review_year
 FROM read_parquet('./book_reviews.parquet') 
 WHERE region='JP' 
-AND review_year = '1969' ;
+AND review_year = '1970' ;
 --
 PRAGMA disable_profiling;
 
 
-select * from book_reviews_1969_JP;
+select * from book_reviews_1970_JP;
 
 PRAGMA disable_optimizer;
 PRAGMA enable_profiling;
 PRAGMA profiling_output='profile_without_pushdown.log';
 --
-CREATE OR REPLACE TABLE book_reviews_1969_JP
+CREATE OR REPLACE TABLE book_reviews_1970_JP
 AS
 SELECT region, review_summary, review_text, review_time, review_year
 FROM read_parquet('./book_reviews.parquet') 
 WHERE region='JP' 
-AND review_year = '1969' ;
+AND review_year = '1970' ;
 --
 PRAGMA disable_profiling;
 
-DROP TABLE IF EXISTS book_reviews_1969_JP;
+DROP TABLE IF EXISTS book_reviews_1970_JP;
 
 ```
 
