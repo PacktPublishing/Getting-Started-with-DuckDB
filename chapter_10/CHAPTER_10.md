@@ -141,3 +141,50 @@ SELECT s.*, bar(w.wind_speed, 0, 20, 20) as wind_bar_plot, w.wind_speed
 FROM scores s ASOF JOIN weather w
 ON s.score_time >= w.measurment_time ;
 ```
+
+## Recursive queries and macros
+
+```sql
+CREATE OR REPLACE TABLE wines AS
+SELECT *
+FROM read_csv('wines.csv', auto_detect=true);
+
+SELECT *
+FROM wines
+ORDER BY wine_id;
+
+WITH RECURSIVE wine_hierarchy(wine_id, start_with, wine_path) AS 
+(
+  SELECT wine_id, wine_name, [wine_name] AS wine_path
+  FROM wines
+  WHERE sub_class_of IS NULL
+  UNION ALL
+  SELECT wines.wine_id,
+      wines.wine_name,
+      list_prepend(wines.wine_name, wine_hierarchy.wine_path)
+  FROM wines, wine_hierarchy
+  WHERE wines.sub_class_of = wine_hierarchy.wine_id
+)
+SELECT wine_path
+FROM wine_hierarchy
+WHERE start_with = 'Rothschild';
+
+
+-- macros
+CREATE OR REPLACE TABLE wine_prices AS
+SELECT *
+FROM read_csv('wine_prices.csv', auto_detect=true);
+
+SELECT wine_name, price, capacity_ml
+FROM wine_prices;
+
+CREATE OR REPLACE MACRO unit_price(price, capacity) AS round(price/capacity, 3);
+
+SELECT wine_name, 
+    price,
+    capacity_ml,
+    unit_price(price, capacity_ml) AS price_ml
+FROM wine_prices;
+
+```
+
