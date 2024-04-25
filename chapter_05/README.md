@@ -53,9 +53,9 @@ CREATE OR REPLACE SEQUENCE book_details_seq;
 
 CREATE OR REPLACE TABLE book_details AS
 SELECT nextval('book_details_seq') AS book_details_id,
-    'Title' as book_title, 
+    Title as book_title, 
     description as book_description
-FROM read_csv('../chapter_04/books_data.csv',  auto_detect=TRUE);
+FROM read_csv('../chapter_04/books_data.csv');
 
 SUMMARIZE book_details;
 
@@ -68,7 +68,7 @@ PRAGMA create_fts_index(
 'book_details_id',
 'book_title',
 'book_description',
-overwrite=1
+overwrite=true
 );
 
 WITH book_cte AS (

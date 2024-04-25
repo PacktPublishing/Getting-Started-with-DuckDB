@@ -182,3 +182,7 @@ chapter_04/books_data.csv
 chapter_04/Books_rating.csv
 chapter_04/book_reviews.parquet
 chapter_04/tmp.tmp/*
+duckdb-book/*
+chapter_02/74id-aqj9.csv
+chapter_02/__MACOSX/._74id-aqj9.csv
+chapter_02/archive_ORIG/74id-aqj9.csv
