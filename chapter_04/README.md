@@ -263,7 +263,6 @@ AS
 SELECT *
 FROM read_csv(
   'apollo.csv',
-  header=true, 
   timestampformat='%d/%b/%Y %H:%M',
   columns={
     'event_time': 'TIMESTAMP', 
