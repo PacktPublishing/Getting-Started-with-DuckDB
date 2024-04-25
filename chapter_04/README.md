@@ -94,7 +94,7 @@ CALL pragma_database_size();
 CREATE OR REPLACE TABLE book_reviews
 AS
 SELECT *
-FROM read_parquet('./book_reviews.parquet');
+FROM read_parquet('book_reviews.parquet');
 
 CALL pragma_database_size();
 
@@ -115,7 +115,7 @@ CALL pragma_database_size();
 CREATE OR REPLACE TABLE book_reviews
 AS
 SELECT *
-FROM read_parquet('./book_reviews.parquet');
+FROM read_parquet('book_reviews.parquet');
 
 CALL pragma_database_size();
 
@@ -138,11 +138,11 @@ SET threads TO 1;
 
 COPY (
     SELECT * 
-    FROM read_parquet('./book_reviews.parquet')
+    FROM read_parquet('book_reviews.parquet')
 ) TO 'book_reviews_hive' (
-    format parquet, 
-    partition_by (review_year, region), 
-    overwrite_or_ignore true
+    FORMAT parquet, 
+    PARTITION_BY (review_year, region), 
+    OVERWRITE_OR_IGNORE true
 );
 
 .timer on
