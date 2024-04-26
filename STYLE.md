@@ -40,3 +40,6 @@ Use lowercase
 ```sql
 .open newdb.db
 ```
+
+# Line Width
+No more than around 60 to 64 characters per line
