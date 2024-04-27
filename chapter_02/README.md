@@ -153,32 +153,36 @@ FROM bikes;
 SUMMARIZE 
 SELECT *  
 FROM bikes;
+
+SELECT * EXCLUDE(count, q25, q50, q75) 
+FROM (SUMMARIZE bikes); 
 ```
 
 # Exporting table data
 
 ```sql
-CREATE OR REPLACE TABLE bike_rides_april 
+CREATE OR REPLACE TABLE bike_readings_april 
 as 
 SELECT * 
 FROM bikes 
 WHERE rundate between '2017-04-01' and '2017-04-30';
 
-COPY bike_rides_april
-TO 'bike_rides_april.csv' (HEADER, DELIMITER ',');
+COPY bike_readings_april TO 'bike_readings_april.csv'; 
+
+COPY bike_readings_april TO 'bike_readings_april.tsv' 
+    (HEADER false, DELIM '\t');
 
 
-COPY (select name, rundate from bike_rides_april)
-TO 'bike_rides_april.json' (FORMAT JSON, dateformat '%d %B %Y');
+COPY ( 
+    SELECT NAME, RUNDATE 
+    FROM bike_readings_april 
+) TO 'bike_readings_april.json' 
+    (FORMAT JSON, TIMESTAMPFORMAT '%d %B %Y'); 
 
-
-COPY bike_rides_april 
-TO 'bike_rides' 
-(FORMAT PARQUET, PARTITION_BY (rundate), OVERWRITE_OR_IGNORE true);
+COPY (
+    SELECT *, date_trunc('day', rundate) AS rundate_truncated
+    FROM bike_readings_april 
+) TO 'bike_readings' 
+(FORMAT PARQUET, PARTITION_BY (rundate_truncated), OVERWRITE_OR_IGNORE true);
 ```
 
-# Exporting a database
-
-```sql
-EXPORT DATABASE 'export_directory';
-```
