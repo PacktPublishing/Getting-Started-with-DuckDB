@@ -98,7 +98,8 @@ DROP TABLE IF EXISTS web_log_text;
 .read "web_log_script.sql"
 
 SELECT *
-FROM web_log_view;
+FROM web_log_view
+LIMIT 5;
 ```
 
 
