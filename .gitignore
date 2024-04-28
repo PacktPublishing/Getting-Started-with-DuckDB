@@ -175,9 +175,9 @@ cython_debug/
 
 chapter_02/archive/*
 chapter_02/export_directory/*
-chapter_02/bike_rides/*
-chapter_02/bike_rides_april.csv
-chapter_02/bike_rides_april.json
+chapter_02/bike_readings/*
+chapter_02/bike_readings_april.csv
+chapter_02/bike_readings_april.json
 chapter_04/books_data.csv
 chapter_04/Books_rating.csv
 chapter_04/book_reviews.parquet
@@ -186,3 +186,6 @@ duckdb-book/*
 chapter_02/74id-aqj9.csv
 chapter_02/__MACOSX/._74id-aqj9.csv
 chapter_02/archive_ORIG/74id-aqj9.csv
+chapter_02/bike_readings_april.tsv
+chapter_04/book_reviews_hive/*
+
