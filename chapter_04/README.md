@@ -88,7 +88,7 @@ WHERE review_year = '2012';
 -- close and restart DuckDB
 .open
 
-CALL pragma_database_size();
+PRAGMA database_size;
 
 -- create in-memory
 CREATE OR REPLACE TABLE book_reviews
@@ -96,36 +96,12 @@ AS
 SELECT *
 FROM read_parquet('book_reviews.parquet');
 
-CALL pragma_database_size();
+PRAGMA database_size;
 
 CREATE INDEX book_reviews_idx1 
 ON book_reviews(region, review_score);
 
-CALL pragma_database_size();
-
-
--- close memory db and open disk database
-.shell rm -f newdb.db;
-
-.open newdb.db
-
-CALL pragma_database_size();
-
--- create on disk
-CREATE OR REPLACE TABLE book_reviews
-AS
-SELECT *
-FROM read_parquet('book_reviews.parquet');
-
-CALL pragma_database_size();
-
-
-CALL pragma_database_size();
-
-SELECT * 
-FROM duckdb_indexes;
-
-DROP TABLE IF EXISTS book_reviews;
+PRAGMA database_size;
 
 ```
 
@@ -146,32 +122,23 @@ COPY (
 );
 
 .timer on
- 
-CREATE OR REPLACE TABLE book_reviews_2012_JP
-AS
+
 SELECT * 
-FROM parquet_scan('book_reviews_hive/*/*/*.parquet', hive_partitioning=true)  
+FROM read_parquet(
+    'book_reviews_hive/*/*/*.parquet', 
+    hive_partitioning=true)  
 WHERE review_year='2012' 
 AND region='JP';
 
-CREATE OR REPLACE TABLE book_reviews_2012_JP
-AS
-SELECT * 
-FROM read_parquet('./book_reviews.parquet')  
+
+SELECT *
+FROM read_parquet('book_reviews.parquet')
 WHERE review_year='2012' 
 AND region='JP';
 
-DROP TABLE IF EXISTS book_reviews_2012;
-
-.shell rm -fr book_reviews_hive;
 
 -- Pushdown
 
--- Reset to default number of threads
-reset threads;
-
--- return the current number of threads
-SELECT current_setting('threads');
 
 -- configure to use only 1 thread
 SET threads TO 1;
@@ -190,7 +157,6 @@ AND review_year = '1970' ;
 PRAGMA disable_profiling;
 
 
-select * from book_reviews_1970_JP;
 
 PRAGMA disable_optimizer;
 PRAGMA enable_profiling;
@@ -213,9 +179,9 @@ DROP TABLE IF EXISTS book_reviews_1970_JP;
 ## Timestamp With Time Zone Functions
 ```sql
 
-SELECT TIMESTAMP '1969-07-21 02:56:00';
+SELECT TIMESTAMP '1969-07-21 02:56:00' AS moonstep;
 
-SELECT TIMESTAMPTZ '1969-07-20 22:56:00-04';
+SELECT TIMESTAMPTZ '1969-07-20 22:56:00-04' AS moonstep_z;
 
 SET timezone = 'UTC';
 
