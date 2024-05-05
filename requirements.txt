@@ -1,9 +1,11 @@
-arrow
 duckdb
 emoji
+ibis-framework
 jupysql
+jupyter-lsp
 jupyterlab
 pandas
-polars
 plotly
+polars
+pyarrow
 sqlparse
