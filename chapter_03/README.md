@@ -1,26 +1,25 @@
 # Chapter 03
 
-## Data import and manipulation
+# Data import and manipulation
+
 ```sql
+CREATE OR REPLACE TABLE web_log_text (raw_text VARCHAR);
 
-CREATE OR REPLACE TABLE web_log_text 
-(raw_text VARCHAR);
-
-COPY web_log_text 
-FROM './access.log' (DELIMITER '');
+COPY web_log_text FROM './access.log' (DELIM '');
 
 SELECT *  
 FROM web_log_text 
 LIMIT 10; 
 
-SELECT regexp_extract(raw_text, '^[0-9\.]*' ) AS client_ip 
+SELECT 
+    regexp_extract(raw_text, '^[0-9\.]*' ) AS client_ip 
 FROM  web_log_text
 LIMIT 3;
 
 SELECT regexp_extract(raw_text, '^[0-9\.]*' ) AS client_ip, 
-regexp_extract(raw_text, '\[(.*)\]',1 ) AS date_text,
-regexp_extract(raw_text, '"([A-Z]*) ',1 ) AS http_method,
-regexp_extract(raw_text, '([a-zA-Z\-]*)"$', 1) AS lang
+    regexp_extract(raw_text, '\[(.*)\]',1 ) AS date_text,
+    regexp_extract(raw_text, '"([A-Z]*) ',1 ) AS http_method,
+    regexp_extract(raw_text, '([a-zA-Z\-]*)"$', 1) AS lang
 FROM  web_log_text
 LIMIT 5;
 
@@ -34,25 +33,30 @@ SELECT regexp_extract(raw_text, '^[0-9\.]*' ) AS client_ip,
 FROM  web_log_text;
 ```
 
-## Altering tables and views 
+# Altering tables and creating views
 
 ```sql
 SELECT *
-FROM web_log_split;
-
-DESCRIBE web_log_split;
+FROM web_log_split
+LIMIT 5;
 
 SELECT client_ip,
-strptime(http_date_text, '%d/%b/%Y:%H:%M:%S %z') AS http_date,
-http_method,
-http_lang,
+    strptime(
+        http_date_text,
+        '%d/%b/%Y:%H:%M:%S %z'
+    ) AS http_date,
+    http_method,
+    http_lang,
 FROM web_log_split;
 
-ALTER TABLE web_log_split
-ADD http_date timestamp with time zone;
+ALTER TABLE web_log_split ADD COLUMN http_date
+    TIMESTAMP WITH TIME ZONE;
 
 UPDATE web_log_split
-SET http_date = strptime(http_date_text, '%d/%b/%Y:%H:%M:%S %z');
+SET http_date = strptime(
+    http_date_text,
+    '%d/%b/%Y:%H:%M:%S %z'
+);
 
 SELECT client_ip,
 http_date,
@@ -69,11 +73,10 @@ INSERT INTO language_iso
 SELECT *
 FROM read_csv('./language_iso.csv');
 
-SELECT wls.http_date,
-wls.http_lang,
-lang.language_name 
-FROM web_log_split wls
-LEFT OUTER JOIN language_iso lang ON (wls.http_lang = lang.lang_iso);
+SELECT wls.http_date, wls.http_lang, lang.language_name
+FROM web_log_split AS wls
+LEFT OUTER JOIN language_iso AS lang
+    ON (wls.http_lang = lang.lang_iso);
  
 CREATE OR REPLACE VIEW web_log_view
 AS
@@ -88,7 +91,8 @@ LEFT OUTER JOIN language_iso lang ON (wls.http_lang = lang.lang_iso);
 DESCRIBE web_log_view;
 
 SELECT *
-FROM web_log_view;
+FROM web_log_view
+LIMIT 5;
 
 DROP VIEW IF EXISTS web_log_view;
 DROP TABLE IF EXISTS language_iso;
@@ -106,7 +110,7 @@ LIMIT 5;
 
 
 
-## Aggregate functions and common table expressions
+# Aggregate functions and common table expressions
 ```sql
 
 .read "web_log_script.sql"
@@ -141,7 +145,7 @@ WITH web_cte AS (
 PIVOT web_cte ON language_name USING count(*);
 ```
 
-## Join data from multiple tables
+# Joining data from multiple tables
 ```sql
 
 
@@ -174,21 +178,20 @@ SELECT LocationID, Borough, Zone
 FROM locations
 LIMIT 5;
 
-CREATE OR REPLACE TABLE trips_with_location
-AS
+CREATE OR REPLACE TABLE trips_with_location AS
 SELECT t.*,
-l_pu.zone AS pick_up_zone,
-l_pu.borough AS pick_up_borough,
-l_do.zone AS drop_off_zone,
-l_do.borough AS drop_off_borough
-FROM trips t
-LEFT JOIN locations l_pu on l_pu.LocationID = t.PULocationID 
-LEFT JOIN locations l_do on l_do.LocationID = t.DOLocationID ;
+    l_pu.zone AS pick_up_zone,
+    l_do.zone AS drop_off_zone
+FROM trips AS t
+LEFT JOIN locations AS l_pu
+    ON l_pu.LocationID = t.PULocationID
+LEFT JOIN locations AS l_do
+    ON l_do.LocationID = t.DOLocationID;
 
 SELECT tpep_pickup_datetime, 
-pick_up_zone, 
-drop_off_zone, 
-trip_distance
+    pick_up_zone, 
+    drop_off_zone, 
+    trip_distance
 FROM trips_with_location
 LIMIT 5;
 
