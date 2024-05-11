@@ -121,25 +121,25 @@ LIMIT 10;
 -- what was the weather for the first skier at 2023-12-01 10:01:00
 WITH weather_cte AS
 (
-  SELECT measurment_time, 
+  SELECT measurement_time, 
   wind_speed, 
   temp,
-  LEAD(measurment_time, 1) OVER (ORDER BY measurment_time) AS measurment_end
+  LEAD(measurement_time, 1) OVER (ORDER BY measurement_time) AS measurement_end
   FROM weather
-  ORDER BY measurment_time
+  ORDER BY measurement_time
 )
 SELECT *
 FROM weather_cte
-WHERE TIMESTAMP '2023-12-01 10:01:00' BETWEEN measurment_time AND measurment_end;
+WHERE TIMESTAMP '2023-12-01 10:01:00' BETWEEN measurement_time AND measurement_end;
 
 
 SELECT *
 FROM scores s ASOF JOIN weather w
-ON s.score_time >= w.measurment_time ;
+ON s.score_time >= w.measurement_time ;
 
 SELECT s.*, bar(w.wind_speed, 0, 20, 20) as wind_bar_plot, w.wind_speed
 FROM scores s ASOF JOIN weather w
-ON s.score_time >= w.measurment_time ;
+ON s.score_time >= w.measurement_time ;
 ```
 
 ## Recursive queries and macros
