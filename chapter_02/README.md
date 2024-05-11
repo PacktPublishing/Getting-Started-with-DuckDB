@@ -21,7 +21,7 @@ FROM foods;
 
 ```sql
 COPY foods (food_name, is_healthy, color, calories)  
-FROM 'foods_with_heading.tsv' (DELIMITER '\t', HEADER);
+FROM 'foods_with_heading.tsv' (DELIM '\t', HEADER);
 ```
 
 
@@ -39,6 +39,9 @@ COPY foods FROM 'foods_error.csv' (IGNORE_ERRORS true);
 ```sql
 SELECT * 
 FROM read_csv('food_prices.csv');
+
+SELECT Delimiter, HasHeader, Columns
+FROM sniff_csv('food_prices.csv');
 
 DESCRIBE SELECT * 
 FROM read_csv('food_prices.csv');
@@ -63,6 +66,13 @@ FROM low_cost_foods;
 SELECT * 
 FROM read_csv('food_orders.csv');
 
+SELECT *
+FROM read_csv(
+'food_orders.csv',
+dateformat='%Y%m%d',
+types={'order_date': 'DATE'}
+);
+
 SELECT * 
 FROM read_csv('food_orders.csv'
 , dateformat='%Y%m%d'
@@ -70,7 +80,7 @@ FROM read_csv('food_orders.csv'
    'food_name': 'VARCHAR', 
    'order_date': 'DATE', 
    'quantity': 'INTEGER'}
-, header=true);
+);
 ```
 
 ## Loading multiple files
@@ -111,10 +121,14 @@ format='array');
 ## Loading Parquet Files
 
 ```sql
-SELECT * 
+SELECT name, type, converted_type
 FROM parquet_schema('food_orders.parquet');
 
 
+SELECT *
+FROM read_parquet('food_orders.parquet');
+
+DESCRIBE
 SELECT *
 FROM read_parquet('food_orders.parquet');
 ```
@@ -130,6 +144,15 @@ FROM read_parquet('food_orders.parquet');
 ## Loading the bike station readings
 
 ```sql
+
+SELECT *
+FROM read_csv('74id-aqj9.csv')
+LIMIT 5;
+
+DESCRIBE
+SELECT *
+FROM read_csv('74id-aqj9.csv');
+
 .mode line
 
 SELECT *
