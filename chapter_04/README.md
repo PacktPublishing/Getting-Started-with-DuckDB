@@ -240,7 +240,7 @@ SELECT event_description,
     astronaut, 
     astronaut_location, 
     LEAD(event_time, 1) OVER(PARTITION BY astronaut ORDER BY event_time) AS end_time,
-    end_time-event_time AS event_duration
+    end_time - event_time AS event_duration
 FROM apollo_events;
 
 SELECT *
