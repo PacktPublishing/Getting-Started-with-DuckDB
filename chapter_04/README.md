@@ -46,8 +46,7 @@ COPY (
 ) TO 'book_reviews.parquet';
 
 
-CREATE OR REPLACE TABLE book_reviews
-AS
+CREATE OR REPLACE TABLE book_reviews AS
 SELECT *
 FROM read_parquet('./book_reviews.parquet');
 
@@ -74,15 +73,15 @@ ON book_reviews(review_year);
 SELECT * 
 FROM duckdb_indexes;
 
-EXPLAIN SELECT count(*)
+EXPLAIN
+SELECT count(*)
 FROM book_reviews
 WHERE user_id = 'A1RRTLWXDOYER5';
 
-EXPLAIN SELECT count(*)
+EXPLAIN
+SELECT count(*)
 FROM book_reviews
 WHERE review_year = '2012';
-
-
 
 
 -- close and restart DuckDB
@@ -91,15 +90,13 @@ WHERE review_year = '2012';
 PRAGMA database_size;
 
 -- create in-memory
-CREATE OR REPLACE TABLE book_reviews
-AS
+CREATE OR REPLACE TABLE book_reviews AS
 SELECT *
 FROM read_parquet('book_reviews.parquet');
 
 PRAGMA database_size;
 
-CREATE INDEX book_reviews_idx1 
-ON book_reviews(region, review_score);
+CREATE INDEX book_reviews_idx1 ON book_reviews(region, review_score);
 
 PRAGMA database_size;
 
@@ -124,17 +121,13 @@ COPY (
 .timer on
 
 SELECT * 
-FROM read_parquet(
-    'book_reviews_hive/*/*/*.parquet', 
-    hive_partitioning=true)  
-WHERE review_year='2012' 
-AND region='JP';
+FROM read_parquet('book_reviews_hive/*/*/*.parquet', hive_partitioning=true)  
+WHERE review_year='2012' AND region='JP';
 
 
 SELECT *
 FROM read_parquet('book_reviews.parquet')
-WHERE review_year='2012' 
-AND region='JP';
+WHERE review_year='2012' AND region='JP';
 
 
 -- Pushdown
@@ -147,8 +140,7 @@ PRAGMA enable_optimizer;
 PRAGMA enable_profiling;
 PRAGMA profiling_output='profile_with_pushdown.log';
 --
-CREATE OR REPLACE TABLE book_reviews_1970_JP
-AS
+CREATE OR REPLACE TABLE book_reviews_1970_JP AS
 SELECT region, review_summary, review_text, review_time, review_year
 FROM read_parquet('./book_reviews.parquet') 
 WHERE region='JP' 
@@ -162,12 +154,10 @@ PRAGMA disable_optimizer;
 PRAGMA enable_profiling;
 PRAGMA profiling_output='profile_without_pushdown.log';
 --
-CREATE OR REPLACE TABLE book_reviews_1970_JP
-AS
+CREATE OR REPLACE TABLE book_reviews_1970_JP AS
 SELECT region, review_summary, review_text, review_time, review_year
 FROM read_parquet('./book_reviews.parquet') 
-WHERE region='JP' 
-AND review_year = '1970' ;
+WHERE region='JP' AND review_year = '1970' ;
 --
 PRAGMA disable_profiling;
 
@@ -192,51 +182,49 @@ CREATE OR REPLACE TABLE timestamp_demo (
 
 INSERT INTO timestamp_demo (col_ts, col_tstz) VALUES('1969-07-21 02:56:00', '1969-07-21 02:56:00');
 
-SELECT current_setting('timezone') as tz,
-col_ts,
-extract(epoch from col_ts) as epoc_ts,
-col_tstz,
-extract(epoch from col_tstz) as epoc_tstz
+SELECT current_setting('timezone') AS tz,
+    col_ts,
+    extract(epoch from col_ts) AS epoc_ts,
+    col_tstz,
+    extract(epoch from col_tstz) AS epoc_tstz
 FROM timestamp_demo;
 
 SET timezone = 'America/New_York';
 
-SELECT current_setting('timezone') as tz,
-col_ts,
-extract(epoch from col_ts) as epoc_ts,
-col_tstz,
-extract(epoch from col_tstz) as epoc_tstz
+SELECT current_setting('timezone') AS tz,
+    col_ts,
+    extract(epoch from col_ts) AS epoc_ts,
+    col_tstz,
+    extract(epoch from col_tstz) AS epoc_tstz
 FROM timestamp_demo;
 
 
 SET timezone = 'America/New_York';
 
-SELECT current_setting('timezone') as tz,
-col_ts,
-dayofmonth(col_ts) as day_of_month_ts,
-dayname(col_ts) as day_name_ts,
-col_tstz,
-dayofmonth(col_tstz)  as day_of_month_tstz,
-dayname(col_tstz)  as day_name_tstz
+SELECT current_setting('timezone') AS tz,
+    col_ts,
+    dayofmonth(col_ts) AS day_of_month_ts,
+    dayname(col_ts) AS day_name_ts,
+    col_tstz,
+    dayofmonth(col_tstz) AS day_of_month_tstz,
+    dayname(col_tstz) AS day_name_tstz
 FROM timestamp_demo;
 ```
 
 ## Window Functions
 ```sql
-
-CREATE OR REPLACE TABLE apollo_events
-AS
+CREATE OR REPLACE TABLE apollo_events AS
 SELECT *
 FROM read_csv(
-  'apollo.csv',
-  timestampformat='%d/%b/%Y %H:%M',
-  columns={
-    'event_time': 'TIMESTAMP', 
-    'astronaut': 'VARCHAR',
-    'event_description': 'VARCHAR',
-    'astronaut_location': 'VARCHAR'
-  }
-) ;
+    'apollo.csv',
+    timestampformat='%d/%b/%Y %H:%M',
+    columns={
+        'event_time': 'TIMESTAMP', 
+        'astronaut': 'VARCHAR',
+        'event_description': 'VARCHAR',
+        'astronaut_location': 'VARCHAR'
+    }
+);
 
 
 SELECT *
@@ -246,14 +234,13 @@ ORDER BY event_time;
 
 SELECT TIMESTAMP '1969-07-21 05:09:00' - TIMESTAMP '1969-07-21 02:56:00' as interval_on_moon;
 
-CREATE OR REPLACE VIEW apollo_activities
-AS
+CREATE OR REPLACE VIEW apollo_activities AS
 SELECT event_description, 
-event_time, 
-astronaut, 
-astronaut_location, 
-LEAD(event_time, 1) OVER(PARTITION BY astronaut ORDER BY event_time) as end_time,
-end_time-event_time as event_duration
+    event_time, 
+    astronaut, 
+    astronaut_location, 
+    LEAD(event_time, 1) OVER(PARTITION BY astronaut ORDER BY event_time) AS end_time,
+    end_time-event_time AS event_duration
 FROM apollo_events;
 
 SELECT *
