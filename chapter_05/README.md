@@ -9,10 +9,7 @@ FROM duckdb_extensions();
 INSTALL sqlite_scanner;
 LOAD sqlite_scanner;
 
-SELECT 
-extension_name,
-installed,
-loaded
+SELECT extension_name, installed, loaded
 FROM duckdb_extensions()
 WHERE extension_name = 'sqlite_scanner';
 
@@ -29,10 +26,7 @@ INSTALL httpfs;
 LOAD httpfs;
 
 SELECT *
-FROM read_csv(
-'https://www2.census.gov/programs-surveys/popest/datasets/2020-2022/cities/totals/sub-est2022.csv',
-auto_detect=true
-);
+FROM read_csv('https://www2.census.gov/programs-surveys/popest/datasets/2020-2022/cities/totals/sub-est2022.csv');
 
 
 CREATE OR REPLACE SECRET mysecret (
@@ -64,20 +58,20 @@ INSTALL fts;
 LOAD fts;
 
 PRAGMA create_fts_index(
-'book_details',
-'book_details_id',
-'book_title',
-'book_description',
-overwrite=true
+    'book_details',
+    'book_details_id',
+    'book_title',
+    'book_description',
+    overwrite=true
 );
 
 WITH book_cte AS (
-  SELECT *, 
-  fts_main_book_details.match_bm25(
-    book_details_id, 
-    'travel france wine'
-    ) AS match_score
-  FROM book_details
+    SELECT *, 
+    fts_main_book_details.match_bm25(
+        book_details_id, 
+        'travel france wine'
+      ) AS match_score
+    FROM book_details
 )
 SELECT book_title, book_description, match_score
 FROM book_cte
@@ -111,7 +105,7 @@ CREATE OR REPLACE TABLE stations AS
 SELECT *
 FROM st_read('stations.xlsx', layer='stations');
 
-SELECT geom FROM st_read('./bordeaux_wine_region.geojson');
+SELECT geom FROM st_read('bordeaux_wine_region.geojson');
 
 SELECT station_name
 FROM stations
@@ -119,7 +113,7 @@ WHERE st_within(
     st_point(longitude, latitude), 
     (
         SELECT geom
-        FROM st_read('./bordeaux_wine_region.geojson')
+        FROM st_read('bordeaux_wine_region.geojson')
     )
 );
 ```
