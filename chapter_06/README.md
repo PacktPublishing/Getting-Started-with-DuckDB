@@ -55,10 +55,13 @@ SELECT {'movie': 'No Time to Die', 'starring': ['Daniel Craig', 'Rami Malek', 'L
 ```sql
 
 CREATE OR REPLACE TABLE film_actors AS
-SELECT * 
-FROM read_csv('film_actors.csv', AUTO_DETECT=TRUE, HEADER=TRUE);
+SELECT *
+FROM read_csv(
+  'film_actors.csv',
+  header=true
+);
 
-SELECT film_name, actor_name, character_name
+SELECT *
 FROM film_actors;
 
 SELECT list(actor_name) AS actors
@@ -135,17 +138,18 @@ SELECT *
 FROM read_json('media_tv.json');
 
 SELECT *
-FROM read_json('./media_tv.json',
-  columns = { 
-    "media_type": VARCHAR, 
-    "name": VARCHAR, 
-    "media_payload": 'STRUCT(
-      "type" VARCHAR, 
-      "genres" VARCHAR[], 
-      "premiered" DATE, 
-      "schedule" STRUCT(
-        "time" VARCHAR, 
-        "days" VARCHAR[]
+FROM read_json(
+  'media_tv.json',
+  columns={
+    media_type: 'VARCHAR',
+    name: 'VARCHAR',
+    media_payload: 'STRUCT(
+      type VARCHAR,
+      genres VARCHAR[],
+      premiered DATE,
+      schedule STRUCT(
+      time VARCHAR,
+      days VARCHAR[]
       )
     )'
   }
