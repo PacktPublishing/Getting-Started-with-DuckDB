@@ -2,7 +2,7 @@
 
 This directory contains the accompanying material for from chapter 8 of *Getting Started with DuckDB*.
 
-The code examples from this chapter are found in the Jupyter notebook `chapter_08.ipynb`.
+The code examples from this chapter are found in the Jupyter notebook [`chapter_08.ipynb`](./chapter_08.ipynb).
 
 See the *Technical requirements* section of the notebook for the dependencies required to run these examples.
 

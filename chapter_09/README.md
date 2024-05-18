@@ -3,8 +3,8 @@
 This directory contains the accompanying material for from chapter 9 of *Getting Started with DuckDB*.
 
 The code examples from this chapter are made available as both an R Markdown document and a Jupyter Notebook:
-1. `chapter_09.Rmd`: R Markdown
-2. `chapter_09.ipynb`: Jupyter Notebook
+1. [`chapter_09.Rmd`](./chapter_09.Rmd): R Markdown
+2. [`chapter_09.ipynb`](./chapter_09.ipynb): Jupyter Notebook
 
 See the *Technical requirements* section of the either of these for the dependencies required to run these examples.
 
