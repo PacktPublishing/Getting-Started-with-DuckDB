@@ -8,5 +8,5 @@
 
 SELECT * 
 FROM 'countries.parquet' 
-LIMIT 5;
+LIMIT 10;
 ```
