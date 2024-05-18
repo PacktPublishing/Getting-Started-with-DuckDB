@@ -5,7 +5,7 @@
 ```sql
 CREATE OR REPLACE TABLE skiers AS
 SELECT * 
-FROM read_csv('skiers.csv', AUTO_DETECT=TRUE);
+FROM read_csv('skiers.csv');
 
 SELECT *
 FROM skiers;
@@ -19,10 +19,10 @@ skier_bib_color,
 FROM skiers;
 
 SELECT s.* EXCLUDE (skier_age, skier_height)
-FROM skiers s;
+FROM skiers AS s;
 
 SELECT s.* REPLACE (round(skier_age/10)*10)::integer as skier_age
-FROM skiers s;
+FROM skiers AS s;
 
 SELECT skier_first_name, COLUMNS('.*color$')
 FROM skiers;
@@ -46,13 +46,13 @@ SELECT CONCAT(
       CONCAT_WS(' ', skier_first_name, skier_last_name))
       , 20
     , '>')
-  , '.') as skier_name
+  , '.') AS skier_name
 FROM skiers;
 
 SELECT CONCAT_WS(' ', skier_first_name, skier_last_name)
 .UPPER()
 .LPAD(20, '>')
-.CONCAT('.') as skier_name
+.CONCAT('.') AS skier_name
 FROM skiers;
 ```
 # BY NAME
@@ -60,18 +60,14 @@ FROM skiers;
 CREATE UNIQUE INDEX skier_unique 
 ON skiers (skier_first_name);
 
-INSERT INTO skiers
-SELECT 'Kim' as skier_first_name, 
-'blue' as skier_helmet_color;
-
 INSERT INTO skiers(skier_first_name, skier_helmet_color)
-SELECT 'Kim' as skier_first_name, 
-'blue' as skier_helmet_color;
+SELECT 'Kim' AS skier_first_name, 
+'blue' AS skier_helmet_color;
 
 INSERT INTO skiers BY NAME 
-SELECT 'green' as skier_helmet_color, 
-'red' as skier_bib_color,
-'Liam' as skier_first_name;
+SELECT 'green' AS skier_helmet_color, 
+'red' AS skier_bib_color,
+'Liam' AS skier_first_name;
 
 SELECT skier_first_name, 
 skier_helmet_color, 
@@ -97,14 +93,14 @@ WHERE skier_first_name='Liam';
 ```sql
 CREATE OR REPLACE TABLE skiers AS
 SELECT * 
-FROM read_csv('skiers.csv', AUTO_DETECT=TRUE);
+FROM read_csv('skiers.csv');
 
 CREATE OR REPLACE TABLE scores AS
 SELECT * 
-FROM read_csv('skier_scores.csv', AUTO_DETECT=TRUE);
+FROM read_csv('skier_scores.csv');
 
 SELECT df1.skier_first_name, df1.skier_last_name, df2.score 
-FROM skiers df1 POSITIONAL JOIN scores df2;
+FROM skiers AS df1 POSITIONAL JOIN scores AS df2;
 ```
 
 # ASOF
@@ -112,7 +108,7 @@ FROM skiers df1 POSITIONAL JOIN scores df2;
 ```sql
 CREATE OR REPLACE TABLE weather AS
 SELECT * 
-FROM read_csv('weather.csv', AUTO_DETECT=TRUE, TIMESTAMPFORMAT='%Y-%m-%d %H:%M:%S');
+FROM read_csv('weather.csv', TIMESTAMPFORMAT='%Y-%m-%d %H:%M:%S');
 
 SELECT *
 FROM weather
@@ -134,11 +130,11 @@ WHERE TIMESTAMP '2023-12-01 10:01:00' BETWEEN measurement_time AND measurement_e
 
 
 SELECT *
-FROM scores s ASOF JOIN weather w
+FROM scores AS s ASOF JOIN weather AS w
 ON s.score_time >= w.measurement_time ;
 
 SELECT s.*, bar(w.wind_speed, 0, 20, 20) as wind_bar_plot, w.wind_speed
-FROM scores s ASOF JOIN weather w
+FROM scores AS s ASOF JOIN weather AS w
 ON s.score_time >= w.measurement_time ;
 ```
 
