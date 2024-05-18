@@ -147,7 +147,7 @@ ON s.score_time >= w.measurement_time ;
 ```sql
 CREATE OR REPLACE TABLE wines AS
 SELECT *
-FROM read_csv('wines.csv', auto_detect=true);
+FROM read_csv('wines.csv');
 
 SELECT *
 FROM wines
@@ -173,7 +173,7 @@ WHERE start_with = 'Rothschild';
 -- macros
 CREATE OR REPLACE TABLE wine_prices AS
 SELECT *
-FROM read_csv('wine_prices.csv', auto_detect=true);
+FROM read_csv('wine_prices.csv');
 
 SELECT wine_name, price, capacity_ml
 FROM wine_prices;
