@@ -86,7 +86,7 @@ SELECT wls.client_ip,
     wls.http_method,
     wls.http_lang,
     lang.language_name 
-FROM web_log_split wls
+FROM web_log_split AS wls
 LEFT OUTER JOIN language_iso lang
     ON (wls.http_lang = lang.lang_iso);
 
