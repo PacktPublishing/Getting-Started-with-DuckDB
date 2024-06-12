@@ -48,7 +48,7 @@ With the following software and hardware list you can run all code files present
 ## Related products
 * Vector Search for Practitioners with Elastic [[Packt]](https://www.packtpub.com/product/vector-search-for-practitioners-with-elastic/9781805121022) [[Amazon]](https://www.amazon.com/Vector-Search-Practitioners-Elastic-observability/dp/1805121022/ref=sr_1_1?dib=eyJ2IjoiMSJ9.r8q88QE9fkss7e7-tsb9dw.vPChMCrBClSvQc2mx61Pq0NdULcbga9K4Rvvs3CECPo&dib_tag=se&keywords=Vector+Search+for+Practitioners+with+Elastic&qid=1718016084&sr=8-1)
 
-* Mastering PostgreSQL 15 [[Packt]](https://www.packtpub.com/product/mastering-postgresql-15-fifth-edition/9781803248349) [[Amazon]](https://www.amazon.com/Mastering-PostgreSQL-techniques-fault-tolerant-applications/dp/1803248343/ref=sr_1_1?crid=7AZ1D2DYJ1MW&dib=eyJ2IjoiMSJ9.hBulU8n0_rghzDwGqgBbR6ow34kZChNTrxlacBXc-sWLNv4TwS5viiWuTVP140gfpRaHElykC4UFzBRtN5N47jAmviVdtKw52DMDBLGGktzV_6D75oEoseDjxi2wX4NO.GH27ByLsfIu4gous0076q5NbTprY67q6OJLfYUCd-fc&dib_tag=se&keywords=Mastering+PostgreSQL+15&qid=1718016403&sprefix=vector+search+for+practitioners+with+elastic%2Caps%2C1049&sr=8-1)
+* Mastering PostgreSQL 15 - Fifth Edition [[Packt]](https://www.packtpub.com/product/mastering-postgresql-15-fifth-edition/9781803248349) [[Amazon]](https://www.amazon.com/Mastering-PostgreSQL-techniques-fault-tolerant-applications/dp/1803248343/ref=sr_1_1?crid=7AZ1D2DYJ1MW&dib=eyJ2IjoiMSJ9.hBulU8n0_rghzDwGqgBbR6ow34kZChNTrxlacBXc-sWLNv4TwS5viiWuTVP140gfpRaHElykC4UFzBRtN5N47jAmviVdtKw52DMDBLGGktzV_6D75oEoseDjxi2wX4NO.GH27ByLsfIu4gous0076q5NbTprY67q6OJLfYUCd-fc&dib_tag=se&keywords=Mastering+PostgreSQL+15&qid=1718016403&sprefix=vector+search+for+practitioners+with+elastic%2Caps%2C1049&sr=8-1)
 
 ## Get to Know the Authors
 **Simon Aubury**
