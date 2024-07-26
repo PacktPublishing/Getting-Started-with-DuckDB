@@ -45,6 +45,10 @@ With the following software and hardware list you can run all code files present
 | 1-12 | The DuckDB Python client | Windows, macOS, or Linux |
 | 1-12 | Th e DuckDB R client | Windows, macOS, or Linux |
 
+## Errata
+
+* Page 120 (Paragraph 1, line 3): **The data we want are located in a sheet named _layers_** _should be_ **The data we want are located in a sheet named _stations_**
+
 ## Related products
 * Vector Search for Practitioners with Elastic [[Packt]](https://www.packtpub.com/product/vector-search-for-practitioners-with-elastic/9781805121022) [[Amazon]](https://www.amazon.com/Vector-Search-Practitioners-Elastic-observability/dp/1805121022/ref=sr_1_1?dib=eyJ2IjoiMSJ9.r8q88QE9fkss7e7-tsb9dw.vPChMCrBClSvQc2mx61Pq0NdULcbga9K4Rvvs3CECPo&dib_tag=se&keywords=Vector+Search+for+Practitioners+with+Elastic&qid=1718016084&sr=8-1)
 
